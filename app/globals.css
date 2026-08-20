@@ -11,8 +11,29 @@
   box-sizing: border-box;
 }
 
+/* Lenis smooth scrolling styles */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
 html {
-  scroll-behavior: smooth;
+  /* Let Lenis control smooth inertia scroll on desktop */
 }
 
 body {
@@ -20,6 +41,7 @@ body {
   background: var(--cream);
   color: var(--black);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 a {
@@ -31,3 +53,176 @@ a {
   background: var(--black);
   color: var(--cream);
 }
+
+/* Custom Cursor Scoping - enabled only on desktop in Hero (#about) and Work (#work) */
+@media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  #about,
+  #about *,
+  #work,
+  #work * {
+    cursor: none !important;
+  }
+}
+
+/* ==========================================================================
+   "Who we build for" & Services Scroll Animations
+   ========================================================================== */
+
+/* 1. Heading & Intro Text slide-in + fade */
+.reveal-heading-intro {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: opacity, transform;
+}
+
+.reveal-heading-intro.is-revealed {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+/* 2. Pill Tags cascade (slide + scale-in + fade) */
+.reveal-pill {
+  opacity: 0;
+  transform: translateX(-20px) scale(0.9);
+  transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: var(--pill-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal-pill.is-revealed {
+  opacity: 1 !important;
+  transform: translateX(0) scale(1) !important;
+}
+
+/* 3. Numbered List Rows (01-04): Mechanical Number Count-up + Horizontal Unfold */
+.reveal-row {
+  opacity: 1;
+}
+
+/* Number badge entry */
+.reveal-row-number {
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-row.is-revealed .reveal-row-number {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+/* Horizontal Unfold Content (Title + Description) */
+.reveal-row-content {
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  opacity: 0;
+  transform: translateX(-15px);
+  transition: clip-path 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              opacity 0.4s ease-out 0.15s;
+  will-change: clip-path, transform, opacity;
+}
+
+.reveal-row.is-revealed .reveal-row-content {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%) !important;
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+/* Divider line leading the row */
+.reveal-divider {
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.reveal-divider.is-revealed {
+  transform: scaleX(1) !important;
+}
+
+/* Row description text subtle secondary reveal */
+.reveal-row-desc {
+  opacity: 0.3;
+  transition: opacity 0.5s ease-out 0.35s;
+}
+
+.reveal-row.is-revealed .reveal-row-desc {
+  opacity: 1 !important;
+}
+
+/* Prefers-reduced-motion: fade-only, 0.3s duration, no slide/scale/clip */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-heading-intro,
+  .reveal-pill,
+  .reveal-row-number,
+  .reveal-row-content,
+  .reveal-divider,
+  .reveal-row-desc {
+    transform: none !important;
+    clip-path: none !important;
+    transition: opacity 0.3s ease-out !important;
+    transition-delay: 0s !important;
+  }
+
+  .reveal-divider {
+    transform: none !important;
+    opacity: 0;
+  }
+
+  .reveal-divider.is-revealed {
+    opacity: 1 !important;
+  }
+
+  .reveal-pill.is-revealed,
+  .reveal-heading-intro.is-revealed,
+  .reveal-row.is-revealed .reveal-row-number,
+  .reveal-row.is-revealed .reveal-row-content,
+  .reveal-row.is-revealed .reveal-row-desc {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ==========================================================================
+   Tilted Card Carousel & Stack Fan
+   ========================================================================== */
+
+.tilted-carousel-container {
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+/* Hide scrollbar for carousel track if overflow occurs */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.card-fanned-shadow {
+  box-shadow: 0 16px 36px -12px rgba(17, 17, 17, 0.12),
+              0 4px 12px -2px rgba(17, 17, 17, 0.06);
+}
+
+.card-fanned-shadow:hover {
+  box-shadow: 0 28px 48px -12px rgba(17, 17, 17, 0.22),
+              0 8px 20px -4px rgba(17, 17, 17, 0.12);
+}
+
+/* Reduced motion adjustments for Work */
+@media (prefers-reduced-motion: reduce) {
+  .tilted-card {
+    transform: none !important;
+    transition: opacity 0.3s ease-out !important;
+  }
+}
