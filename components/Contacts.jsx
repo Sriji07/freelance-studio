@@ -124,7 +124,6 @@ export default function Contact() {
                             <input
                                 id="name"
                                 type="text"
-                                placeholder="John Doe"
                                 className="w-full border-b border-[#f4f0e8]/15 bg-transparent py-3 text-base text-[#f4f0e8] outline-none placeholder:text-[#f4f0e8]/20 focus:border-[#f4f0e8] transition-colors"
                             />
                         </div>
@@ -141,7 +140,6 @@ export default function Contact() {
                             <input
                                 id="business"
                                 type="text"
-                                placeholder="Your business name"
                                 className="w-full border-b border-[#f4f0e8]/15 bg-transparent py-3 text-base text-[#f4f0e8] outline-none placeholder:text-[#f4f0e8]/20 focus:border-[#f4f0e8] transition-colors"
                             />
                         </div>
@@ -158,7 +156,6 @@ export default function Contact() {
                             <input
                                 id="email"
                                 type="email"
-                                placeholder="you@example.com"
                                 className="w-full border-b border-[#f4f0e8]/15 bg-transparent py-3 text-base text-[#f4f0e8] outline-none placeholder:text-[#f4f0e8]/20 focus:border-[#f4f0e8] transition-colors"
                             />
                         </div>
@@ -202,7 +199,6 @@ export default function Contact() {
                             <textarea
                                 id="message"
                                 rows="3"
-                                placeholder="What do you have in mind?"
                                 className="w-full resize-none border-b border-[#f4f0e8]/15 bg-transparent py-3 text-base text-[#f4f0e8] outline-none placeholder:text-[#f4f0e8]/20 focus:border-[#f4f0e8] transition-colors"
                             />
                         </div>

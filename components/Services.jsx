@@ -56,9 +56,7 @@ export default function Services() {
                     <div className="mb-5 flex items-center gap-3">
                         <span className="h-2 w-2 rounded-full bg-[#f4f0e8]" />
 
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f4f0e8]/50 sm:text-xs">
-                            01 — What We Do
-                        </span>
+
                     </div>
 
                     <h2 className="max-w-4xl text-5xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-6xl md:text-8xl lg:text-[7rem]">
@@ -90,9 +88,7 @@ export default function Services() {
                             </p>
                         </div>
 
-                        <span className="text-xs uppercase tracking-[0.15em] text-[#f4f0e8]/30">
-                            Select an industry
-                        </span>
+
                     </div>
 
                     {/* Industry pills */}
@@ -111,9 +107,7 @@ export default function Services() {
                             >
                                 {industry}
 
-                                <span className="ml-2 inline-block opacity-0 transition-all duration-300 group-hover:translate-x-1 group-hover:opacity-100">
-                                    ↗
-                                </span>
+
                             </motion.button>
                         ))}
                     </div>

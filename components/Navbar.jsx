@@ -22,7 +22,7 @@ export default function Navbar() {
                     {/* Logo */}
                     <a
                         href="#about"
-                        className="relative z-50 text-lg font-bold tracking-[-0.05em] md:text-xl"
+                        className="relative z-50 text-lg font-bold tracking-[-0.05em] md:text-4xl"
                     >
                         STUDIO<span className="opacity-30">.</span>
                     </a>
@@ -33,7 +33,7 @@ export default function Navbar() {
                             <a
                                 key={item.name}
                                 href={item.href}
-                                className="group relative text-sm font-medium text-black/70 transition-colors duration-300 hover:text-black"
+                                className="group relative text-xl font-medium text-black/70 transition-colors duration-300 hover:text-black"
                             >
                                 {item.name}
 
@@ -42,16 +42,7 @@ export default function Navbar() {
                         ))}
                     </div>
 
-                    {/* Desktop CTA */}
-                    <a
-                        href="#contact"
-                        className="group hidden items-center gap-2 border-b border-black pb-1 text-sm font-semibold md:flex"
-                    >
-                        Let's Talk
-                        <span className="inline-block transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
-                            ↗
-                        </span>
-                    </a>
+
 
                     {/* Mobile Menu Button */}
                     <button
@@ -112,21 +103,6 @@ export default function Navbar() {
                                     {item.name}
                                 </motion.a>
                             ))}
-
-                            <motion.a
-                                href="#contact"
-                                onClick={() => setMenuOpen(false)}
-                                initial={{ opacity: 0, x: -30 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{
-                                    delay: 0.35,
-                                    duration: 0.4,
-                                }}
-                                className="mt-6 flex w-fit items-center gap-2 border-b border-[#f4f0e8] pb-1 text-lg font-medium"
-                            >
-                                Let's Talk
-                                <span>↗</span>
-                            </motion.a>
                         </div>
 
                         {/* Mobile footer */}
