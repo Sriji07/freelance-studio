@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
@@ -12,19 +12,60 @@ const navItems = [
 
 export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [visible, setVisible] = useState(true);
+    const [scrolledPastHero, setScrolledPastHero] = useState(false);
+    const lastScrollY = useRef(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            
+            // Background blur / solid styling once scrolled past 80px
+            setScrolledPastHero(currentScrollY > 80);
+
+            // Hide on scroll-down, show on scroll-up
+            if (currentScrollY > 150) {
+                if (currentScrollY > lastScrollY.current + 8) {
+                    setVisible(false); // scrolling down
+                } else if (currentScrollY < lastScrollY.current - 8) {
+                    setVisible(true); // scrolling up
+                }
+            } else {
+                setVisible(true);
+            }
+
+            lastScrollY.current = currentScrollY;
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     return (
         <>
             {/* Navbar */}
-            <header className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-[#f4f0e8]/75 backdrop-blur-xl backdrop-saturate-150">
-                <nav className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between px-5 md:h-[82px] md:px-10 lg:px-12">
+            <header 
+                className={`fixed left-0 top-0 z-50 w-full transition-all duration-300 ${
+                    visible ? "translate-y-0" : "-translate-y-full"
+                } ${
+                    scrolledPastHero 
+                        ? "border-b border-black/10 bg-[#f4f0e8]/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)]" 
+                        : "border-b border-transparent bg-transparent"
+                }`}
+            >
+                <nav className="mx-auto flex min-h-[76px] max-w-[1400px] items-center justify-between px-5 py-3 md:min-h-[90px] md:px-10 lg:px-12">
 
-                    {/* Logo */}
+                    {/* Logo & Slogan */}
                     <a
                         href="#about"
-                        className="relative z-50 text-lg font-bold tracking-[-0.05em] md:text-4xl"
+                        className="relative z-50 flex flex-col justify-center"
                     >
-                        STUDIO<span className="opacity-30">.</span>
+                        <span className="text-2xl font-black leading-none tracking-[-0.06em] sm:text-3xl md:text-5xl">
+                            DIVE<span className="opacity-30">.</span>
+                        </span>
+                        <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.18em] text-black/60 sm:text-[10px] md:text-[11px]">
+                            Delve into design. Experience the immersive
+                        </span>
                     </a>
 
                     {/* Desktop Navigation */}
@@ -41,8 +82,6 @@ export default function Navbar() {
                             </a>
                         ))}
                     </div>
-
-
 
                     {/* Mobile Menu Button */}
                     <button
@@ -107,7 +146,7 @@ export default function Navbar() {
 
                         {/* Mobile footer */}
                         <div className="absolute bottom-8 left-6 right-6 flex justify-between text-xs uppercase tracking-[0.2em] text-white/40">
-                            <span>Independent Studio</span>
+                            <span>Dive</span>
                             <span>2026</span>
                         </div>
                     </motion.div>

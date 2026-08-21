@@ -1,6 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const freelancers = [
     {
@@ -20,112 +23,200 @@ const freelancers = [
 ];
 
 export default function Hero() {
+    const prefersReducedMotion = useReducedMotion();
+    const heroRef = useRef(null);
+    const headlineRef = useRef(null);
+    const contentRef = useRef(null);
+    const circleBgRef = useRef(null);
+    const [isHighlighted, setIsHighlighted] = useState(false);
+
+    // Start highlighter animation
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsHighlighted(true);
+        }, 1200);
+
+        return () => clearTimeout(timer);
+    }, []);
+
+    // GSAP ScrollTrigger Pinned Hero-to-Section Transition + Layered Parallax
+    useEffect(() => {
+        if (prefersReducedMotion || typeof window === "undefined") return;
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const ctx = gsap.context(() => {
+            // 1. Pinned Hero Transition & Cinematic Docking
+            const heroTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: heroRef.current,
+                    start: "top top",
+                    end: "+=70%",
+                    pin: true,
+                    scrub: 0.8,
+                    anticipatePin: 1,
+                },
+            });
+
+            heroTl.to(headlineRef.current, {
+                scale: 0.85,
+                y: -40,
+                opacity: 0.85,
+                ease: "power2.out",
+            }, 0);
+
+            heroTl.to(contentRef.current, {
+                opacity: 0.3,
+                y: -30,
+                ease: "power2.out",
+            }, 0);
+
+            // 5. Layered Parallax with subtle rotation & scale scrubbing on background decoration
+            if (circleBgRef.current) {
+                gsap.to(circleBgRef.current, {
+                    scrollTrigger: {
+                        trigger: heroRef.current,
+                        start: "top top",
+                        end: "bottom top",
+                        scrub: 1,
+                    },
+                    rotation: 45,
+                    scale: 1.15,
+                    y: 100,
+                    ease: "none",
+                });
+            }
+        }, heroRef);
+
+        return () => ctx.revert();
+    }, [prefersReducedMotion]);
+
     return (
         <section
+            ref={heroRef}
             id="about"
-            className="relative min-h-screen overflow-hidden bg-[#f4f0e8] px-5 pb-16 pt-28 md:px-10 md:pb-20 md:pt-32"
+            className="relative min-h-screen overflow-hidden bg-[#f4f0e8] px-5 pb-16 pt-28 sm:pt-32 md:px-10 md:pb-24 md:pt-36 lg:pt-40"
         >
             {/* =====================================================
-                BACKGROUND DECORATION
+                BACKGROUND DECORATION (Layered Parallax + Rotation)
             ====================================================== */}
-
-            <div className="pointer-events-none absolute right-[-180px] top-[18%] z-0 h-[420px] w-[420px] md:right-[-180px] md:top-[15%] md:h-[600px] md:w-[600px]">
-
+            <div 
+                ref={circleBgRef}
+                className="pointer-events-none absolute right-[-180px] top-[18%] z-0 h-[420px] w-[420px] md:right-[-180px] md:top-[15%] md:h-[600px] md:w-[600px]"
+            >
                 {/* Static circle */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                        duration: 1.2,
-                        ease: "easeOut",
-                    }}
-                    className="absolute inset-0 rounded-full border border-black/[0.07]"
-                />
+                <div className="absolute inset-0 rounded-full border border-black/[0.07]" />
 
                 {/* Rotating dashed circle */}
-                <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{
-                        duration: 40,
-                        repeat: Infinity,
-                        ease: "linear",
-                    }}
-                    className="absolute inset-[35px] rounded-full border border-dashed border-black/[0.06] md:inset-[50px]"
-                />
+                <div className="absolute inset-[35px] rounded-full border border-dashed border-black/[0.06] md:inset-[50px] animate-[spin_40s_linear_infinite]" />
             </div>
 
             {/* =====================================================
                 MAIN CONTENT
             ====================================================== */}
-
-            <div className="relative z-10 mx-auto flex min-h-[calc(100vh-7rem)] w-full max-w-7xl flex-col justify-center">
-
-                {/* Intro */}
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="mb-7 flex items-center gap-3"
-                >
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-[#111111]" />
-
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#111111]/60 sm:text-xs">
-                        Independent Web Design Studio
-                    </span>
-                </motion.div>
+            <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col justify-center pt-2 sm:pt-3 md:pt-4">
 
                 {/* =================================================
-                    MAIN HEADING
+                    MAIN HEADING WITH SCROLL-TRIGGERED HIGHLIGHTER
                 ================================================== */}
-
-                <motion.h1
-                    initial={{ opacity: 0, y: 45 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                        duration: 0.8,
-                        delay: 0.1,
-                        ease: [0.22, 1, 0.36, 1],
-                    }}
-                    className="relative max-w-5xl text-[16vw] font-bold leading-[0.83] tracking-[-0.075em] text-[#111111] sm:text-[12vw] md:text-[9vw] lg:text-[7.5rem]"
+                <h1
+                    ref={headlineRef}
+                    className="relative max-w-5xl text-[12vw] font-bold leading-[0.88] tracking-[-0.06em] text-[#111111] sm:text-[9vw] md:text-[6.5vw] lg:text-[5.5rem] will-change-transform"
                 >
-                    <span className="block">
-                        WE BUILD
+                    <span className="block overflow-hidden">
+                        <span className="inline-block animate-[fadeUp_0.8s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards]">
+                            WE BUILD
+                        </span>
                     </span>
 
                     <span className="relative block w-fit">
                         WEBSITES
 
+                        {/* Baton-pass underline */}
                         <motion.span
-                            initial={{ width: 0 }}
-                            animate={{ width: "100%" }}
+                            initial={{ width: "100%", opacity: 1 }}
+                            animate={
+                                isHighlighted
+                                    ? { width: 0, opacity: 0 }
+                                    : { width: "100%", opacity: 1 }
+                            }
                             transition={{
-                                duration: 0.9,
-                                delay: 0.8,
+                                duration: prefersReducedMotion ? 0.4 : 0.8,
+                                ease: [0.76, 0, 0.24, 1],
                             }}
-                            className="absolute bottom-[-3px] left-0 h-[2px] bg-[#111111] md:bottom-[-7px] md:h-[3px]"
+                            className="absolute bottom-[-2px] left-0 h-[2px] bg-[#111111] md:bottom-[-4px] md:h-[3px] origin-left"
                         />
                     </span>
 
-                    <span className="block text-[#111111]/20">
-                        FOR BUSINESS.
+                    {/* HIGHLIGHTER / MARKER REVEAL EFFECT ON 'FOR BUSINESS.' */}
+                    <span className="relative inline-block w-fit mt-1 px-2 py-0.5 sm:px-2.5 sm:py-1 -mx-2 sm:-mx-2.5">
+                        <motion.span
+                            initial={
+                                prefersReducedMotion
+                                    ? { opacity: 0 }
+                                    : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
+                            }
+                            animate={
+                                isHighlighted
+                                    ? prefersReducedMotion
+                                        ? { opacity: 1 }
+                                        : { clipPath: "inset(0 0% 0 0)", opacity: 1 }
+                                    : prefersReducedMotion
+                                        ? { opacity: 0 }
+                                        : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
+                            }
+                            transition={
+                                prefersReducedMotion
+                                    ? { duration: 0.4 }
+                                    : { duration: 1.0, ease: [0.76, 0, 0.24, 1] }
+                            }
+                            className="pointer-events-none absolute inset-0 z-0 bg-[#111111] will-change-[clip-path]"
+                            aria-hidden="true"
+                        />
+
+                        {/* BASE DIMMED TEXT LAYER */}
+                        <span className="block text-[#c9c5ba]">
+                            FOR BUSINESS.
+                        </span>
+
+                        {/* SYNCHRONIZED BRIGHT CREAM TEXT */}
+                        <motion.span
+                            initial={
+                                prefersReducedMotion
+                                    ? { opacity: 0 }
+                                    : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
+                            }
+                            animate={
+                                isHighlighted
+                                    ? prefersReducedMotion
+                                        ? { opacity: 1 }
+                                        : { clipPath: "inset(0 0% 0 0)", opacity: 1 }
+                                    : prefersReducedMotion
+                                        ? { opacity: 0 }
+                                        : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
+                            }
+                            transition={
+                                prefersReducedMotion
+                                    ? { duration: 0.4 }
+                                    : { duration: 1.0, ease: [0.76, 0, 0.24, 1] }
+                            }
+                            className="pointer-events-none absolute inset-0 z-10 block px-2 py-0.5 sm:px-2.5 sm:py-1 text-[#f4f0e8] will-change-[clip-path]"
+                            aria-hidden="true"
+                        >
+                            FOR BUSINESS.
+                        </motion.span>
                     </span>
-                </motion.h1>
+                </h1>
 
                 {/* =================================================
-                    FREELANCERS
+                    FREELANCERS & SUBTEXT IN DOCKED TRANSITION
                 ================================================== */}
 
-                <div className="mt-10 grid gap-6 md:mt-14 md:grid-cols-2 md:gap-10">
+                <div ref={contentRef} className="mt-10 grid gap-6 md:mt-14 md:grid-cols-2 md:gap-10">
 
                     {freelancers.map((person, index) => (
-                        <motion.div
+                        <div
                             key={person.name}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                                duration: 0.6,
-                                delay: 0.5 + index * 0.12,
-                            }}
                             className="max-w-lg border-t border-[#111111]/15 pt-5"
                         >
                             {/* Profile */}
@@ -153,12 +244,11 @@ export default function Hero() {
                             </div>
 
                             {/* Description */}
-                            <p className="mt-4 max-w-md text-sm leading-relaxed text-[#111111]/55 md:text-base">
+                            <p className="mt-3 text-xs leading-relaxed text-[#111111]/60">
                                 {person.description}
                             </p>
-                        </motion.div>
+                        </div>
                     ))}
-
                 </div>
 
                 {/* =================================================
@@ -177,7 +267,8 @@ export default function Hero() {
                     {/* View Work */}
                     <a
                         href="#work"
-                        className="group inline-flex items-center rounded-full bg-[#111111] px-6 py-3 text-sm font-medium !text-[#f4f0e8] transition-all duration-300 hover:px-8"
+                        data-magnetic="true"
+                        className="magnetic-btn group inline-flex items-center rounded-full bg-[#111111] px-6 py-3 text-sm font-medium !text-[#f4f0e8] transition-[padding,background-color,color] duration-300 will-change-transform hover:px-8"
                     >
                         <span className="!text-[#f4f0e8]">
                             View Our Work
@@ -191,7 +282,8 @@ export default function Hero() {
                     {/* Contact */}
                     <a
                         href="#contact"
-                        className="inline-flex items-center rounded-full border border-[#111111]/20 px-6 py-3 text-sm font-medium !text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#f4f0e8]"
+                        data-magnetic="true"
+                        className="magnetic-btn inline-flex items-center rounded-full border border-[#111111]/20 px-6 py-3 text-sm font-medium !text-[#111111] transition-[padding,background-color,color] duration-300 will-change-transform hover:bg-[#111111] hover:!text-[#f4f0e8]"
                     >
                         Let's Talk
                     </a>

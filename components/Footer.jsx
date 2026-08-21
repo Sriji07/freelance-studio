@@ -24,11 +24,11 @@ export default function Footer() {
                             whileHover={{ x: 4 }}
                             className="inline-block text-3xl font-bold tracking-[-0.06em] md:text-4xl"
                         >
-                            STUDIO<span className="text-[#f4f0e8]/30">.</span>
+                            DIVE<span className="text-[#f4f0e8]/30">.</span>
                         </motion.a>
 
                         <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#f4f0e8]/40">
-                            Websites designed for businesses that want to stand out.
+                            Delve into design. Experience the immersive.
                         </p>
                     </div>
 
@@ -79,7 +79,7 @@ export default function Footer() {
 
                 {/* Bottom line */}
                 <div className="mt-16 flex flex-col gap-3 border-t border-[#f4f0e8]/10 pt-5 text-[9px] uppercase tracking-[0.18em] text-[#f4f0e8]/25 sm:flex-row sm:items-center sm:justify-between">
-                    <span>© 2026 Studio. All rights reserved.</span>
+                    <span>© 2026 Dive. All rights reserved.</span>
 
                     <button
                         onClick={() =>

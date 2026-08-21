@@ -1,12 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 
 const contactOptions = [
     {
         label: "Email",
-        value: "hello@yourstudio.com",
-        href: "mailto:hello@yourstudio.com",
+        value: "hello@dive.design",
+        href: "mailto:hello@dive.design",
     },
     {
         label: "WhatsApp",
@@ -15,12 +16,49 @@ const contactOptions = [
     },
     {
         label: "Instagram",
-        value: "@yourstudio",
+        value: "@dive.design",
         href: "#",
     },
 ];
 
+const FULL_TEXT = "Have a business";
+
 export default function Contact() {
+    const prefersReducedMotion = useReducedMotion();
+    const headingRef = useRef(null);
+    const isInView = useInView(headingRef, { once: true, amount: 0.3 });
+    
+    // Typewriter state
+    const [typedText, setTypedText] = useState(prefersReducedMotion ? FULL_TEXT : "");
+    const [typingComplete, setTypingComplete] = useState(Boolean(prefersReducedMotion));
+
+    useEffect(() => {
+        if (prefersReducedMotion || !isInView) {
+            if (prefersReducedMotion) {
+                setTypedText(FULL_TEXT);
+                setTypingComplete(true);
+            }
+            return;
+        }
+
+        let charIndex = 0;
+        setTypedText("");
+        setTypingComplete(false);
+
+        // Typing interval (smooth mechanical cadence ~65ms per char)
+        const interval = setInterval(() => {
+            charIndex += 1;
+            setTypedText(FULL_TEXT.slice(0, charIndex));
+
+            if (charIndex >= FULL_TEXT.length) {
+                clearInterval(interval);
+                setTypingComplete(true);
+            }
+        }, 65);
+
+        return () => clearInterval(interval);
+    }, [isInView, prefersReducedMotion]);
+
     return (
         <section
             id="contact"
@@ -38,12 +76,7 @@ export default function Contact() {
             <div className="relative z-10 mx-auto max-w-7xl">
 
                 {/* Section heading */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.7 }}
-                >
+                <div ref={headingRef}>
                     <div className="mb-5 flex items-center gap-3">
                         <span className="h-2 w-2 rounded-full bg-[#f4f0e8]" />
 
@@ -53,13 +86,53 @@ export default function Contact() {
                     </div>
 
                     <h2 className="max-w-5xl text-5xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-6xl md:text-8xl lg:text-[8rem]">
-                        Have a business?
-                        <br />
-                        <span className="text-[#f4f0e8]/25">
-                            Let's build its website.
+                        {/* Typewriter Text */}
+                        <span className="inline-block">
+                            {typedText}
                         </span>
+
+                        {/* Blinking Question Mark (Dramatic entrance after typing pause, then slow hypnotic pulse) */}
+                        {typingComplete && (
+                            <motion.span
+                                initial={{ opacity: 0, scale: 0.7, y: 4 }}
+                                animate={{
+                                    opacity: [0, 1, 1, 0.2, 1, 1, 0.2, 1],
+                                    scale: 1,
+                                    y: 0,
+                                }}
+                                transition={{
+                                    opacity: {
+                                        duration: 2.4,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                        times: [0, 0.15, 0.35, 0.5, 0.65, 0.8, 0.9, 1],
+                                        delay: 0.15,
+                                    },
+                                    scale: { duration: 0.45, ease: [0.34, 1.56, 0.64, 1], delay: 0.15 },
+                                    y: { duration: 0.45, ease: "easeOut", delay: 0.15 },
+                                }}
+                                className="inline-block text-[#f4f0e8] will-change-[opacity,transform]"
+                            >
+                                ?
+                            </motion.span>
+                        )}
+
+                        <br />
+                        {/* Subtext: Slow, heavy, cinematic drift into place with extra breathing room */}
+                        <motion.span 
+                            initial={{ opacity: 0, y: 32 }}
+                            animate={typingComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
+                            transition={{ 
+                                duration: 1.2, 
+                                ease: [0.16, 1, 0.3, 1], // Smooth cinematic expo-out curve
+                                delay: 0.65 // Gives the user time to register the question mark
+                            }}
+                            className="inline-block text-[#f4f0e8]/25 will-change-[opacity,transform]"
+                        >
+                            Let's build its website.
+                        </motion.span>
                     </h2>
-                </motion.div>
+                </div>
 
                 {/* Content */}
                 <div className="mt-16 grid gap-16 border-t border-[#f4f0e8]/10 pt-10 md:mt-24 md:grid-cols-[1fr_1.2fr] md:gap-20">
