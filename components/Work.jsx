@@ -60,7 +60,9 @@ export default function Work() {
     useEffect(() => {
         const updateWidth = () => {
             if (containerRef.current) {
-                setContainerWidth(containerRef.current.offsetWidth);
+                setContainerWidth(containerRef.current.offsetWidth || window.innerWidth);
+            } else if (typeof window !== "undefined") {
+                setContainerWidth(window.innerWidth);
             }
         };
         updateWidth();
@@ -75,7 +77,7 @@ export default function Work() {
         gsap.registerPlugin(ScrollTrigger);
 
         const ctx = gsap.context(() => {
-            // 2. Split-Text masked word rising reveal (scrub: 0.3)
+            // Split-Text masked word rising reveal
             const words = titleHeadingRef.current?.querySelectorAll(".split-word-inner");
             if (words && words.length > 0) {
                 gsap.fromTo(
@@ -85,18 +87,18 @@ export default function Work() {
                         yPercent: 0,
                         opacity: 1,
                         stagger: 0.08,
+                        duration: 0.8,
                         ease: "power3.out",
                         scrollTrigger: {
                             trigger: titleHeadingRef.current,
-                            start: "top 85%",
-                            end: "top 45%",
-                            scrub: 0.3,
+                            start: "top 90%",
+                            toggleActions: "play none none none",
                         },
                     }
                 );
             }
 
-            // 5. Layered Parallax with subtle rotate (3-5deg) & scale (1 -> 1.1) on background watermark
+            // Layered Parallax with subtle rotate (3-5deg) & scale (1 -> 1.1) on background watermark
             if (watermarkRef.current) {
                 gsap.to(watermarkRef.current, {
                     rotation: 5,
@@ -221,7 +223,7 @@ export default function Work() {
                 {/* Tilted-Card Carousel Track (Curved semi-circular arc layout, center-anchored) */}
                 <div 
                     ref={containerRef}
-                    className="tilted-carousel-container relative mt-12 overflow-hidden py-12"
+                    className="tilted-carousel-container relative mt-12 w-full overflow-visible py-12"
                 >
                     <motion.div
                         drag="x"
