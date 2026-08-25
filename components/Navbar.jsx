@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import gsap from "gsap";
 
 const navItems = [
     { name: "About", href: "#about" },
@@ -11,15 +12,19 @@ const navItems = [
 ];
 
 export default function Navbar() {
+    const prefersReducedMotion = useReducedMotion();
     const [menuOpen, setMenuOpen] = useState(false);
     const [visible, setVisible] = useState(true);
     const [scrolledPastHero, setScrolledPastHero] = useState(false);
     const lastScrollY = useRef(0);
+    const navItemsRef = useRef([]);
+    const logoRef = useRef(null);
 
+    // Scroll state tracking
     useEffect(() => {
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
-            
+
             // Background blur / solid styling once scrolled past 80px
             setScrolledPastHero(currentScrollY > 80);
 
@@ -41,24 +46,55 @@ export default function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    // 1. & 5. Nav Entrance animation (fade in + translateY -10px -> 0, staggered 60ms after hero text finishes ~1.0s)
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        if (prefersReducedMotion) {
+            gsap.set([logoRef.current, ...navItemsRef.current], {
+                opacity: 1,
+                y: 0,
+            });
+            return;
+        }
+
+        gsap.set([logoRef.current, ...navItemsRef.current], {
+            opacity: 0,
+            y: -10,
+        });
+
+        // Starts after hero text reveals (~1.0s delay)
+        gsap.to([logoRef.current, ...navItemsRef.current], {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.06,
+            delay: 0.95,
+            ease: "expo.out",
+        });
+    }, [prefersReducedMotion]);
+
     return (
         <>
-            {/* Navbar */}
-            <header 
-                className={`fixed left-0 top-0 z-50 w-full transition-all duration-300 ${
-                    visible ? "translate-y-0" : "-translate-y-full"
-                } ${
-                    scrolledPastHero 
-                        ? "border-b border-black/10 bg-[#f4f0e8]/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)]" 
+            {/* Navbar Header */}
+            <header
+                className={`fixed left-0 top-0 z-50 w-full transition-all duration-300 ${visible ? "translate-y-0" : "-translate-y-full"
+                    } ${scrolledPastHero
+                        ? "border-b border-black/10 bg-[#f4f0e8]/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
                         : "border-b border-transparent bg-transparent"
-                }`}
+                    }`}
             >
                 <nav className="mx-auto flex min-h-[76px] max-w-[1400px] items-center justify-between px-5 py-3 md:min-h-[90px] md:px-10 lg:px-12">
 
                     {/* Logo & Slogan */}
                     <a
-                        href="#about"
-                        className="relative z-50 flex flex-col justify-center"
+                        ref={logoRef}
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            window.dispatchEvent(new CustomEvent("trigger-velvet-top"));
+                        }}
+                        className="relative z-50 flex flex-col justify-center cursor-pointer"
                     >
                         <span className="text-2xl font-black leading-none tracking-[-0.06em] sm:text-3xl md:text-5xl">
                             DIVE<span className="opacity-30">.</span>
@@ -68,17 +104,22 @@ export default function Navbar() {
                         </span>
                     </a>
 
-                    {/* Desktop Navigation */}
+                    {/* Desktop Navigation with 5. GSAP/CSS Nav Link 2px Underline scaleX 0->1 */}
                     <div className="hidden items-center gap-8 md:flex">
-                        {navItems.map((item) => (
+                        {navItems.map((item, index) => (
                             <a
                                 key={item.name}
+                                ref={(el) => (navItemsRef.current[index] = el)}
                                 href={item.href}
-                                className="group relative text-xl font-medium text-black/70 transition-colors duration-300 hover:text-black"
+                                className="nav-link-item group relative py-1 text-xl font-medium text-black/70 transition-colors duration-300 hover:text-black"
                             >
-                                {item.name}
+                                <span>{item.name}</span>
 
-                                <span className="absolute -bottom-1 left-0 h-px w-0 bg-black transition-all duration-300 group-hover:w-full" />
+                                {/* 5. 2px Black Underline with origin-left and scaleX 0->1 */}
+                                <span
+                                    className="pointer-events-none absolute bottom-0 left-0 h-[2px] w-full bg-black scale-x-0 origin-left transition-transform duration-300 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-x-100 will-change-transform"
+                                    aria-hidden="true"
+                                />
                             </a>
                         ))}
                     </div>
@@ -94,6 +135,7 @@ export default function Navbar() {
                                 animate={{
                                     rotate: menuOpen ? 45 : 0,
                                     y: menuOpen ? 4 : 0,
+                                    backgroundColor: menuOpen ? "#f4f0e8" : "#111111",
                                 }}
                                 transition={{ duration: 0.25 }}
                                 className="block h-[1.5px] w-full bg-black"
@@ -103,6 +145,7 @@ export default function Navbar() {
                                 animate={{
                                     rotate: menuOpen ? -45 : 0,
                                     y: menuOpen ? -1 : 0,
+                                    backgroundColor: menuOpen ? "#f4f0e8" : "#111111",
                                 }}
                                 transition={{ duration: 0.25 }}
                                 className="block h-[1.5px] w-full bg-black"

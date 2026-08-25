@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -25,205 +25,297 @@ const freelancers = [
 export default function Hero() {
     const prefersReducedMotion = useReducedMotion();
     const heroRef = useRef(null);
-    const headlineRef = useRef(null);
-    const contentRef = useRef(null);
-    const circleBgRef = useRef(null);
-    const [isHighlighted, setIsHighlighted] = useState(false);
+    const line1Ref = useRef(null);
+    const line2Ref = useRef(null);
+    const line3Ref = useRef(null);
+    const line3BlockRef = useRef(null);
+    const line3TextRef = useRef(null);
+    const circleGraphicRef = useRef(null);
+    const cardsContainerRef = useRef(null);
+    const buttonsRef = useRef(null);
+    const statsRef = useRef(null);
 
-    // Start highlighter animation
+    // Mouse parallax tracking ref
+    const mousePos = useRef({ x: 0, y: 0 });
+    const targetPos = useRef({ x: 0, y: 0 });
+    const currentPos = useRef({ x: 0, y: 0 });
+    const rafId = useRef(null);
+
+    // 1. GSAP Hero Text Reveal & ScrollTrigger Setup
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsHighlighted(true);
-        }, 1200);
-
-        return () => clearTimeout(timer);
-    }, []);
-
-    // GSAP ScrollTrigger Pinned Hero-to-Section Transition + Layered Parallax
-    useEffect(() => {
-        if (prefersReducedMotion || typeof window === "undefined") return;
+        if (typeof window === "undefined") return;
 
         gsap.registerPlugin(ScrollTrigger);
 
         const ctx = gsap.context(() => {
-            // 1. Pinned Hero Transition & Cinematic Docking
-            const heroTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: heroRef.current,
-                    start: "top top",
-                    end: "+=70%",
-                    pin: true,
-                    scrub: 0.8,
-                    anticipatePin: 1,
+            if (prefersReducedMotion) {
+                // Reduced motion fallback: simple fade in
+                gsap.set([line1Ref.current, line2Ref.current, line3TextRef.current, line3BlockRef.current, cardsContainerRef.current, buttonsRef.current, statsRef.current], {
+                    opacity: 1,
+                    y: 0,
+                    scaleX: 1,
+                });
+                return;
+            }
+
+            // Initial states (Hidden behind masks until intro reveals the page)
+            gsap.set([line1Ref.current, line2Ref.current, line3TextRef.current], {
+                yPercent: 100,
+                opacity: 0,
+            });
+            gsap.set(line3BlockRef.current, {
+                scaleX: 0,
+                transformOrigin: "left center",
+            });
+            gsap.set([cardsContainerRef.current, buttonsRef.current, statsRef.current], {
+                opacity: 0,
+                y: 20,
+            });
+
+            // Master Hero Entry Animation function (Runs on initial reveal & on DIVE back-to-top)
+            const playHeroReveal = (isBackToTop = false) => {
+                const tl = gsap.timeline({ defaults: { ease: isBackToTop ? "back.out(1.4)" : "expo.out" } });
+
+                if (isBackToTop) {
+                    // Reset elements quickly for snappy pop-in
+                    gsap.set([line1Ref.current, line2Ref.current, line3TextRef.current], {
+                        yPercent: 80,
+                        opacity: 0,
+                    });
+                    gsap.set(line3BlockRef.current, {
+                        scaleX: 0,
+                        transformOrigin: "left center",
+                    });
+                    gsap.set([cardsContainerRef.current, buttonsRef.current], {
+                        opacity: 0,
+                        y: 18,
+                        scale: 0.96,
+                    });
+                }
+
+                // 1. Line 1 "WE BUILD" (duration 0.75s)
+                tl.to(line1Ref.current, {
+                    yPercent: 0,
+                    opacity: 1,
+                    duration: 0.75,
+                }, 0.05);
+
+                // 2. Line 2 "WEBSITES" (staggered 100ms)
+                tl.to(line2Ref.current, {
+                    yPercent: 0,
+                    opacity: 1,
+                    duration: 0.75,
+                }, 0.15);
+
+                // 3. Black background block behind "FOR BUSINESS." scaleX 0 -> 1 (200ms before text reveals)
+                tl.to(line3BlockRef.current, {
+                    scaleX: 1,
+                    duration: 0.6,
+                    ease: "expo.out",
+                }, 0.2);
+
+                // 4. Line 3 "FOR BUSINESS." text reveals (staggered after block)
+                tl.to(line3TextRef.current, {
+                    yPercent: 0,
+                    opacity: 1,
+                    duration: 0.75,
+                }, 0.38);
+
+                // 5. Team cards, Buttons and stats pop in with slight spring
+                tl.to(cardsContainerRef.current, {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    duration: 0.7,
+                    ease: "back.out(1.2)",
+                }, 0.55);
+
+                tl.to([buttonsRef.current, statsRef.current], {
+                    opacity: 1,
+                    y: 0,
+                    scale: 1,
+                    stagger: 0.1,
+                    duration: 0.65,
+                    ease: "back.out(1.2)",
+                }, 0.7);
+            };
+
+            // Listen for initial intro reveal completion
+            let initialPlayed = false;
+            const handleInitialReveal = () => {
+                if (initialPlayed) return;
+                initialPlayed = true;
+                playHeroReveal(false);
+            };
+            window.addEventListener("intro-reveal-complete", handleInitialReveal);
+
+            // Listen for DIVE logo click (back-to-top transition)
+            const handleBackToTopPop = () => {
+                // Play snappy popping animation after smooth scroll reaches top
+                setTimeout(() => {
+                    playHeroReveal(true);
+                }, 350);
+            };
+            window.addEventListener("trigger-velvet-top", handleBackToTopPop);
+
+            // Safety timeout: ensure initial animation plays after 2.5s even if event was missed
+            const timer = setTimeout(handleInitialReveal, 2500);
+
+            // 2. Continuous 90s slow rotation on circle graphic
+            if (circleGraphicRef.current) {
+                gsap.to(circleGraphicRef.current, {
+                    rotation: 360,
+                    duration: 90,
+                    ease: "none",
+                    repeat: -1,
+                });
+            }
+
+            // ScrollTrigger subtle hero dock/fade
+            ScrollTrigger.create({
+                trigger: heroRef.current,
+                start: "top top",
+                end: "bottom top",
+                scrub: 1,
+                onUpdate: (self) => {
+                    const progress = self.progress;
+                    if (heroRef.current) {
+                        gsap.set(heroRef.current.querySelector(".hero-content-inner"), {
+                            y: progress * -50,
+                            opacity: 1 - progress * 0.4,
+                        });
+                    }
                 },
             });
 
-            heroTl.to(headlineRef.current, {
-                scale: 0.85,
-                y: -40,
-                opacity: 0.85,
-                ease: "power2.out",
-            }, 0);
-
-            heroTl.to(contentRef.current, {
-                opacity: 0.3,
-                y: -30,
-                ease: "power2.out",
-            }, 0);
-
-            // 5. Layered Parallax with subtle rotation & scale scrubbing on background decoration
-            if (circleBgRef.current) {
-                gsap.to(circleBgRef.current, {
-                    scrollTrigger: {
-                        trigger: heroRef.current,
-                        start: "top top",
-                        end: "bottom top",
-                        scrub: 1,
-                    },
-                    rotation: 45,
-                    scale: 1.15,
-                    y: 100,
-                    ease: "none",
-                });
-            }
+            return () => {
+                window.removeEventListener("intro-reveal-complete", playHeroReveal);
+                clearTimeout(timer);
+            };
         }, heroRef);
 
         return () => ctx.revert();
+    }, [prefersReducedMotion]);
+
+    // 2. Mouse Parallax on Background Circle Graphic (Damping factor ~0.05, max 15px)
+    useEffect(() => {
+        if (prefersReducedMotion || typeof window === "undefined") return;
+
+        const handleMouseMove = (e) => {
+            const { innerWidth, innerHeight } = window;
+            const x = (e.clientX / innerWidth - 0.5) * 2; // -1 to 1
+            const y = (e.clientY / innerHeight - 0.5) * 2; // -1 to 1
+
+            targetPos.current = {
+                x: x * 15,
+                y: y * 15,
+            };
+        };
+
+        const updateParallax = () => {
+            // Lerp smoothing (damping ~0.05)
+            currentPos.current.x += (targetPos.current.x - currentPos.current.x) * 0.05;
+            currentPos.current.y += (targetPos.current.y - currentPos.current.y) * 0.05;
+
+            if (circleGraphicRef.current) {
+                gsap.set(circleGraphicRef.current, {
+                    x: currentPos.current.x,
+                    y: currentPos.current.y,
+                });
+            }
+
+            rafId.current = requestAnimationFrame(updateParallax);
+        };
+
+        window.addEventListener("mousemove", handleMouseMove, { passive: true });
+        rafId.current = requestAnimationFrame(updateParallax);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            if (rafId.current) cancelAnimationFrame(rafId.current);
+        };
     }, [prefersReducedMotion]);
 
     return (
         <section
             ref={heroRef}
             id="about"
-            className="relative min-h-screen overflow-hidden bg-[#f4f0e8] px-5 pb-16 pt-28 sm:pt-32 md:px-10 md:pb-24 md:pt-36 lg:pt-40"
+            className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-[#f4f0e8] px-5 pb-8 pt-20 sm:pt-24 md:px-10 md:pb-10 md:pt-28"
         >
             {/* =====================================================
-                BACKGROUND DECORATION (Layered Parallax + Rotation)
+                2. AMBIENT BACKGROUND MOTION (Continuous 90s rotation + Smooth 15px lerped mouse parallax)
             ====================================================== */}
-            <div 
-                ref={circleBgRef}
-                className="pointer-events-none absolute right-[-180px] top-[18%] z-0 h-[420px] w-[420px] md:right-[-180px] md:top-[15%] md:h-[600px] md:w-[600px]"
+            <div
+                ref={circleGraphicRef}
+                className="pointer-events-none absolute right-[-140px] top-[12%] z-0 h-[380px] w-[380px] md:right-[-100px] md:top-[10%] md:h-[540px] md:w-[540px] will-change-transform opacity-80"
+                aria-hidden="true"
             >
-                {/* Static circle */}
+                {/* Static/smooth outer ring */}
                 <div className="absolute inset-0 rounded-full border border-black/[0.07]" />
 
-                {/* Rotating dashed circle */}
-                <div className="absolute inset-[35px] rounded-full border border-dashed border-black/[0.06] md:inset-[50px] animate-[spin_40s_linear_infinite]" />
+                {/* Dashed concentric arc ring */}
+                <div className="absolute inset-[30px] rounded-full border border-dashed border-black/[0.08] md:inset-[45px]" />
+
+                {/* Inner ambient accent ring */}
+                <div className="absolute inset-[70px] rounded-full border border-black/[0.04] md:inset-[95px]" />
             </div>
 
             {/* =====================================================
-                MAIN CONTENT
+                MAIN CONTENT (Optimized to fit viewport gracefully)
             ====================================================== */}
-            <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col justify-center pt-2 sm:pt-3 md:pt-4">
+            <div className="hero-content-inner relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center will-change-transform">
 
                 {/* =================================================
-                    MAIN HEADING WITH SCROLL-TRIGGERED HIGHLIGHTER
+                    1. HERO TEXT REVEAL (Wrapped in overflow-hidden, clip/mask translateY 100%->0%, expo.out)
                 ================================================== */}
-                <h1
-                    ref={headlineRef}
-                    className="relative max-w-5xl text-[12vw] font-bold leading-[0.88] tracking-[-0.06em] text-[#111111] sm:text-[9vw] md:text-[6.5vw] lg:text-[5.5rem] will-change-transform"
-                >
-                    <span className="block overflow-hidden">
-                        <span className="inline-block animate-[fadeUp_0.8s_cubic-bezier(0.25,0.46,0.45,0.94)_forwards]">
+                <h1 className="relative max-w-5xl text-[11vw] font-bold leading-[0.9] tracking-[-0.05em] text-[#111111] sm:text-[8vw] md:text-[5.5vw] lg:text-[4.8rem]">
+
+                    {/* Line 1: WE BUILD */}
+                    <span className="block overflow-hidden py-0.5">
+                        <span ref={line1Ref} className="inline-block will-change-transform">
                             WE BUILD
                         </span>
                     </span>
 
-                    <span className="relative block w-fit">
-                        WEBSITES
-
-                        {/* Baton-pass underline */}
-                        <motion.span
-                            initial={{ width: "100%", opacity: 1 }}
-                            animate={
-                                isHighlighted
-                                    ? { width: 0, opacity: 0 }
-                                    : { width: "100%", opacity: 1 }
-                            }
-                            transition={{
-                                duration: prefersReducedMotion ? 0.4 : 0.8,
-                                ease: [0.76, 0, 0.24, 1],
-                            }}
-                            className="absolute bottom-[-2px] left-0 h-[2px] bg-[#111111] md:bottom-[-4px] md:h-[3px] origin-left"
-                        />
+                    {/* Line 2: WEBSITES */}
+                    <span className="block overflow-hidden py-0.5">
+                        <span ref={line2Ref} className="inline-block will-change-transform">
+                            WEBSITES
+                        </span>
                     </span>
 
-                    {/* HIGHLIGHTER / MARKER REVEAL EFFECT ON 'FOR BUSINESS.' */}
-                    <span className="relative inline-block w-fit mt-1 px-2 py-0.5 sm:px-2.5 sm:py-1 -mx-2 sm:-mx-2.5">
-                        <motion.span
-                            initial={
-                                prefersReducedMotion
-                                    ? { opacity: 0 }
-                                    : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
-                            }
-                            animate={
-                                isHighlighted
-                                    ? prefersReducedMotion
-                                        ? { opacity: 1 }
-                                        : { clipPath: "inset(0 0% 0 0)", opacity: 1 }
-                                    : prefersReducedMotion
-                                        ? { opacity: 0 }
-                                        : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
-                            }
-                            transition={
-                                prefersReducedMotion
-                                    ? { duration: 0.4 }
-                                    : { duration: 1.0, ease: [0.76, 0, 0.24, 1] }
-                            }
-                            className="pointer-events-none absolute inset-0 z-0 bg-[#111111] will-change-[clip-path]"
+                    {/* Line 3: FOR BUSINESS. (with scaleX 0->1 black block 200ms before text) */}
+                    <span className="relative inline-block overflow-hidden mt-1 px-3 py-1 sm:px-3.5 sm:py-1 -mx-3 sm:-mx-3.5">
+                        {/* Black background accent block with FLIP shared morph hook */}
+                        <span
+                            ref={line3BlockRef}
+                            className="hero-morph-target pointer-events-none absolute inset-0 z-0 bg-[#111111] will-change-transform rounded-[4px]"
                             aria-hidden="true"
                         />
 
-                        {/* BASE DIMMED TEXT LAYER */}
-                        <span className="block text-[#c9c5ba]">
-                            FOR BUSINESS.
-                        </span>
-
-                        {/* SYNCHRONIZED BRIGHT CREAM TEXT */}
-                        <motion.span
-                            initial={
-                                prefersReducedMotion
-                                    ? { opacity: 0 }
-                                    : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
-                            }
-                            animate={
-                                isHighlighted
-                                    ? prefersReducedMotion
-                                        ? { opacity: 1 }
-                                        : { clipPath: "inset(0 0% 0 0)", opacity: 1 }
-                                    : prefersReducedMotion
-                                        ? { opacity: 0 }
-                                        : { clipPath: "inset(0 100% 0 0)", opacity: 1 }
-                            }
-                            transition={
-                                prefersReducedMotion
-                                    ? { duration: 0.4 }
-                                    : { duration: 1.0, ease: [0.76, 0, 0.24, 1] }
-                            }
-                            className="pointer-events-none absolute inset-0 z-10 block px-2 py-0.5 sm:px-2.5 sm:py-1 text-[#f4f0e8] will-change-[clip-path]"
-                            aria-hidden="true"
+                        {/* Masked text reveal layer */}
+                        <span
+                            ref={line3TextRef}
+                            className="relative z-10 inline-block text-[#f4f0e8] will-change-transform"
                         >
                             FOR BUSINESS.
-                        </motion.span>
+                        </span>
                     </span>
                 </h1>
 
                 {/* =================================================
-                    FREELANCERS & SUBTEXT IN DOCKED TRANSITION
+                    6. TEAM CARDS (Hover: translateY -4px, avatar scale 1.05, soft shadow 0 20px 40px)
                 ================================================== */}
-
-                <div ref={contentRef} className="mt-10 grid gap-6 md:mt-14 md:grid-cols-2 md:gap-10">
-
-                    {freelancers.map((person, index) => (
+                <div ref={cardsContainerRef} className="mt-6 grid gap-4 sm:grid-cols-2 md:mt-8 md:gap-6 max-w-4xl">
+                    {freelancers.map((person) => (
                         <div
                             key={person.name}
-                            className="max-w-lg border-t border-[#111111]/15 pt-5"
+                            className="team-card rounded-xl border border-[#111111]/10 bg-transparent p-4 sm:p-5 transition-all duration-300"
                         >
                             {/* Profile */}
-                            <div className="flex items-center gap-4">
-
+                            <div className="flex items-center gap-3">
                                 {/* Photo */}
-                                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-black/10">
+                                <div className="team-avatar h-11 w-11 shrink-0 overflow-hidden rounded-full bg-black/10">
                                     <img
                                         src={person.image}
                                         alt={person.name}
@@ -233,18 +325,18 @@ export default function Hero() {
 
                                 {/* Name + role */}
                                 <div>
-                                    <h3 className="text-base font-semibold tracking-[-0.02em]">
+                                    <h3 className="text-sm font-semibold tracking-[-0.02em] text-[#111111] sm:text-base">
                                         {person.name}
                                     </h3>
 
-                                    <p className="mt-1 text-[9px] uppercase tracking-[0.16em] text-[#111111]/40">
+                                    <p className="text-[9px] uppercase tracking-[0.16em] text-[#111111]/50 font-mono">
                                         {person.role}
                                     </p>
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <p className="mt-3 text-xs leading-relaxed text-[#111111]/60">
+                            <p className="mt-2.5 text-xs leading-relaxed text-[#111111]/70">
                                 {person.description}
                             </p>
                         </div>
@@ -252,96 +344,94 @@ export default function Hero() {
                 </div>
 
                 {/* =================================================
-                    BUTTONS
+                    4. BUTTON HOVER INTERACTIONS
+                    - Primary: White panel sweeps left->right (scaleX 0->1), text turns black, scales 1.03
+                    - Secondary: Outline to black fill, scales 1.03
                 ================================================== */}
-
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                        duration: 0.6,
-                        delay: 0.8,
-                    }}
-                    className="relative z-20 mt-8 flex flex-wrap gap-3 md:mt-10"
+                <div
+                    ref={buttonsRef}
+                    className="relative z-20 mt-6 flex flex-wrap items-center gap-3 md:mt-8"
                 >
-                    {/* View Work */}
+                    {/* Primary Button */}
                     <a
                         href="#work"
-                        data-magnetic="true"
-                        className="magnetic-btn group inline-flex items-center rounded-full bg-[#111111] px-6 py-3 text-sm font-medium !text-[#f4f0e8] transition-[padding,background-color,color] duration-300 will-change-transform hover:px-8"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const workSection = document.getElementById("work");
+                            if (workSection) {
+                                workSection.scrollIntoView({ behavior: "smooth" });
+                            }
+                        }}
+                        className="btn-primary-sweep px-6 py-3 text-xs sm:text-sm font-medium cursor-pointer"
                     >
-                        <span className="!text-[#f4f0e8]">
-                            View Our Work
-                        </span>
-
-                        <span className="ml-2 !text-[#f4f0e8] transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
-                            ↗
+                        <span className="btn-text-content inline-flex items-center gap-2">
+                            <span>View Our Work</span>
+                            <span className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                                ↗
+                            </span>
                         </span>
                     </a>
 
-                    {/* Contact */}
+                    {/* Secondary Button */}
                     <a
                         href="#contact"
-                        data-magnetic="true"
-                        className="magnetic-btn inline-flex items-center rounded-full border border-[#111111]/20 px-6 py-3 text-sm font-medium !text-[#111111] transition-[padding,background-color,color] duration-300 will-change-transform hover:bg-[#111111] hover:!text-[#f4f0e8]"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const contactSection = document.getElementById("contact");
+                            if (contactSection) {
+                                contactSection.scrollIntoView({ behavior: "smooth" });
+                            }
+                        }}
+                        className="btn-secondary-outline px-6 py-3 text-xs sm:text-sm font-medium cursor-pointer"
                     >
-                        Let's Talk
+                        <span>Let's Talk</span>
                     </a>
-                </motion.div>
+                </div>
+            </div>
 
-                {/* =================================================
-                    BOTTOM INFORMATION
-                ================================================== */}
+            {/* =================================================
+                BOTTOM INFORMATION / STATS
+            ================================================== */}
+            <div
+                ref={statsRef}
+                className="relative z-10 mx-auto w-full max-w-7xl border-t border-[#111111]/10 pt-4 mt-6"
+            >
+                <div className="flex items-center justify-between">
+                    {/* Stats */}
+                    <div className="flex flex-wrap items-center gap-3 md:gap-6">
+                        <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/50 sm:text-xs">
+                            02 Designers
+                        </span>
 
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{
-                        duration: 0.6,
-                        delay: 1,
-                    }}
-                    className="mt-12 border-t border-[#111111]/10 pt-5 md:mt-14"
-                >
-                    <div className="flex items-center justify-between">
+                        <span className="h-1 w-1 rounded-full bg-[#111111]/20" />
 
-                        {/* Stats */}
-                        <div className="flex flex-wrap items-center gap-4 md:gap-6">
+                        <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/50 sm:text-xs">
+                            Multiple Industries
+                        </span>
 
-                            <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/40 sm:text-xs">
-                                02 Designers
-                            </span>
+                        <span className="hidden h-1 w-1 rounded-full bg-[#111111]/20 sm:block" />
 
-                            <span className="h-1 w-1 rounded-full bg-[#111111]/20" />
-
-                            <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/40 sm:text-xs">
-                                Multiple Industries
-                            </span>
-
-                            <span className="hidden h-1 w-1 rounded-full bg-[#111111]/20 sm:block" />
-
-                            <span className="hidden text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/40 sm:block sm:text-xs">
-                                Built With Purpose
-                            </span>
-
-                        </div>
-
-                        {/* Scroll */}
-                        <motion.a
-                            href="#services"
-                            animate={{ y: [0, 4, 0] }}
-                            transition={{
-                                duration: 1.6,
-                                repeat: Infinity,
-                                ease: "easeInOut",
-                            }}
-                            className="hidden items-center gap-2 text-[10px] uppercase tracking-[0.18em] !text-[#111111]/40 md:flex"
-                        >
-                            Scroll
-                            <span>↓</span>
-                        </motion.a>
-
+                        <span className="hidden text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/50 sm:block sm:text-xs">
+                            Built With Purpose
+                        </span>
                     </div>
-                </motion.div>
+
+                    {/* Scroll */}
+                    <a
+                        href="#services"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const servicesSection = document.getElementById("services");
+                            if (servicesSection) {
+                                servicesSection.scrollIntoView({ behavior: "smooth" });
+                            }
+                        }}
+                        className="hidden items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-[#111111]/50 transition-colors hover:text-[#111111] md:flex cursor-pointer"
+                    >
+                        <span>Scroll</span>
+                        <span className="animate-bounce">↓</span>
+                    </a>
+                </div>
             </div>
         </section>
     );

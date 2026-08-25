@@ -20,9 +20,13 @@ export default function Footer() {
                     {/* Brand */}
                     <div>
                         <motion.a
-                            href="#about"
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                window.dispatchEvent(new CustomEvent("trigger-velvet-top"));
+                            }}
                             whileHover={{ x: 4 }}
-                            className="inline-block text-3xl font-bold tracking-[-0.06em] md:text-4xl"
+                            className="inline-block text-3xl font-bold tracking-[-0.06em] md:text-4xl cursor-pointer"
                         >
                             DIVE<span className="text-[#f4f0e8]/30">.</span>
                         </motion.a>

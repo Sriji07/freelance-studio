@@ -2,6 +2,11 @@ import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import ScrollProgressBar from "@/components/ScrollProgressBar";
+import GSAPScrollObserver from "@/components/GSAPScrollObserver";
+import VelvetMorphOverlay from "@/components/VelvetMorphOverlay";
+import SectionMorphController from "@/components/SectionMorphController";
+import SplineStarfieldDiveIntro from "@/components/SplineStarfieldDiveIntro";
+import Ambient3DDominoBackdrop from "@/components/Ambient3DDominoBackdrop";
 
 export const metadata = {
   title: "Dive — Delve into design. Experience the immersive",
@@ -12,12 +17,22 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <SmoothScrollProvider>
-          <ScrollProgressBar />
-          <CustomCursor />
-          {children}
-        </SmoothScrollProvider>
+      <body className="bg-[#030712] text-[#f4f0e8] selection:bg-white selection:text-[#030712]">
+        <SplineStarfieldDiveIntro>
+          <SmoothScrollProvider>
+            {/* Monochrome 3D Domino Ring & Starfield Backdrop */}
+            <Ambient3DDominoBackdrop />
+            {/* Section Morphing Controller */}
+            <SectionMorphController />
+            {/* Fullscreen Velvet Morph */}
+            <VelvetMorphOverlay />
+            {/* Global Scroll Observer */}
+            <GSAPScrollObserver />
+            <ScrollProgressBar />
+            <CustomCursor />
+            {children}
+          </SmoothScrollProvider>
+        </SplineStarfieldDiveIntro>
       </body>
     </html>
   );
