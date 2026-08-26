@@ -111,7 +111,14 @@ export default function Navbar() {
                                 key={item.name}
                                 ref={(el) => (navItemsRef.current[index] = el)}
                                 href={item.href}
-                                className="nav-link-item group relative py-1 text-xl font-medium text-black/70 transition-colors duration-300 hover:text-black"
+                                data-transition="corner-curtain"
+                                onClick={(e) => {
+                                    if (typeof window !== "undefined" && window.triggerCornerTransition) {
+                                        e.preventDefault();
+                                        window.triggerCornerTransition(item.href, item.name);
+                                    }
+                                }}
+                                className="nav-link-item group relative py-1 text-xl font-medium text-black/70 transition-colors duration-300 hover:text-black cursor-pointer"
                             >
                                 <span>{item.name}</span>
 
@@ -173,14 +180,20 @@ export default function Navbar() {
                                 <motion.a
                                     key={item.name}
                                     href={item.href}
-                                    onClick={() => setMenuOpen(false)}
+                                    onClick={(e) => {
+                                        setMenuOpen(false);
+                                        if (typeof window !== "undefined" && window.triggerCornerTransition) {
+                                            e.preventDefault();
+                                            window.triggerCornerTransition(item.href, item.name);
+                                        }
+                                    }}
                                     initial={{ opacity: 0, x: -30 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{
                                         delay: index * 0.07,
                                         duration: 0.4,
                                     }}
-                                    className="text-5xl font-bold tracking-[-0.06em]"
+                                    className="text-5xl font-bold tracking-[-0.06em] cursor-pointer"
                                 >
                                     {item.name}
                                 </motion.a>

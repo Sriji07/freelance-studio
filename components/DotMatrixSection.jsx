@@ -7,15 +7,17 @@ import DotMatrixText from "@/components/ui/dot-text";
 const teamMembers = [
   {
     name: "Srijita Mallick",
+    defaultTitle: "DEVELOPER",
     role: "Designer & Developer",
-    image: "/team/you.jpg",
+    image: "/team/srijita.png",
     description:
       "I focus on creating clean, responsive interfaces that make businesses look professional and easy to discover online.",
   },
   {
     name: "Shubhradip Saha",
+    defaultTitle: "DESIGN ARCHITECT",
     role: "Designer & Developer",
-    image: "/team/friend.jpg",
+    image: "/team/shubhradip.png",
     description:
       "I turn ideas into polished digital experiences, focusing on visual design, usability and the details that make a website feel unique.",
   },
@@ -50,26 +52,48 @@ export default function DotMatrixSection() {
           </p>
         </motion.div>
 
-        {/* Pure Dot Matrix Typography Stage */}
+        {/* Pure Dot Matrix Typography Stage with Slot-Machine / Roller Hover Transition */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative mx-auto mt-8 flex h-48 w-full max-w-5xl items-center justify-center sm:h-60 md:h-72"
+          className="group/dot-stage cursor-target relative mx-auto mt-8 h-48 w-full max-w-5xl overflow-hidden sm:h-60 md:h-72 select-none"
         >
-          <DotMatrixText
-            text={["DESIGN", "DEVELOP", "DIVE"]}
-            transition="fade"
-            cycleInterval={2800}
-            dotSize={4}
-            gap={3}
-            activeColor="#f4f0e8"
-            inactiveColor="rgba(244, 240, 232, 0.05)"
-            showInactive={true}
-            fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
-            className="h-full w-full drop-shadow-[0_0_30px_rgba(244,240,232,0.35)]"
-          />
+          {/* Vertical Slot-Machine Roller Track */}
+          <div className="flex h-[200%] w-full flex-col transition-transform duration-500 ease-[cubic-bezier(0.77,0,0.175,1)] group-hover/dot-stage:-translate-y-1/2 will-change-transform">
+            {/* 1. Normal State Dot Matrix Canvas */}
+            <div className="flex h-1/2 w-full items-center justify-center">
+              <DotMatrixText
+                text={["DESIGN", "DEVELOP", "DIVE"]}
+                transition="fade"
+                cycleInterval={1650}
+                dotSize={4}
+                gap={3}
+                activeColor="#f4f0e8"
+                inactiveColor="rgba(244, 240, 232, 0.05)"
+                showInactive={true}
+                fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+                className="h-full w-full drop-shadow-[0_0_30px_rgba(244,240,232,0.35)]"
+              />
+            </div>
+
+            {/* 2. Hover Revealed Duplicate Roller Stage */}
+            <div className="flex h-1/2 w-full items-center justify-center">
+              <DotMatrixText
+                text={["DESIGN", "DEVELOP", "DIVE"]}
+                transition="fade"
+                cycleInterval={1650}
+                dotSize={4}
+                gap={3}
+                activeColor="#f4f0e8"
+                inactiveColor="rgba(244, 240, 232, 0.05)"
+                showInactive={true}
+                fontFamily="Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif"
+                className="h-full w-full drop-shadow-[0_0_35px_rgba(244,240,232,0.5)]"
+              />
+            </div>
+          </div>
         </motion.div>
 
         {/* Bottom subtle indicator */}
@@ -98,21 +122,54 @@ export default function DotMatrixSection() {
             >
               {/* Profile Header */}
               <div className="flex items-center gap-3.5">
-                {/* Avatar with subtle border glow */}
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#f4f0e8]/20 bg-[#f4f0e8]/5 transition-transform duration-300 group-hover:scale-105">
+                {/* Avatar with subtle border glow and initials fallback */}
+                <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#f4f0e8]/20 bg-[#f4f0e8]/10 transition-transform duration-300 group-hover:scale-105">
+                  <span className="font-mono text-xs font-bold text-[#f4f0e8]/80 select-none">
+                    {person.name.split(" ").map((n) => n[0]).join("")}
+                  </span>
                   <img
                     src={person.image}
                     alt={person.name}
-                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 </div>
 
-                {/* Name & Role */}
-                <div>
-                  <h3 className="text-base font-semibold tracking-[-0.02em] text-[#f4f0e8]">
-                    {person.name}
-                  </h3>
-                  <p className="text-[10px] uppercase tracking-[0.18em] text-[#f4f0e8]/50 font-mono">
+                {/* Rolling Text / Slot-Machine Header Track */}
+                <div className="flex flex-col justify-center">
+                  <div className="relative h-6 sm:h-7 overflow-hidden">
+                    <div className="flex flex-col transition-transform duration-400 ease-[cubic-bezier(0.77,0,0.175,1)] group-hover:-translate-y-1/2">
+                      {/* State 1 (Default): DEVELOPER / DESIGN ARCHITECT */}
+                      <span
+                        style={{
+                          fontFamily: "'Anton', 'Bebas Neue', sans-serif",
+                          fontWeight: 900,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                        className="flex h-6 sm:h-7 items-center text-lg sm:text-xl text-[#f4f0e8] leading-none tracking-wider select-none"
+                      >
+                        {person.defaultTitle}
+                      </span>
+
+                      {/* State 2 (On Hover): SRIJITA MALLICK / SHUBHRADIP SAHA */}
+                      <span
+                        style={{
+                          fontFamily: "'Anton', 'Bebas Neue', sans-serif",
+                          fontWeight: 900,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                        className="flex h-6 sm:h-7 items-center text-lg sm:text-xl text-[#f4f0e8] leading-none tracking-wider text-[#f4f0e8] select-none"
+                      >
+                        {person.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="mt-0.5 text-[10px] uppercase tracking-[0.18em] text-[#f4f0e8]/40 font-mono">
                     {person.role}
                   </p>
                 </div>

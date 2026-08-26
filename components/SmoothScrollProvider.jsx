@@ -37,7 +37,10 @@ export default function SmoothScrollProvider({ children }) {
 
         gsap.ticker.lagSmoothing(0);
 
+        window.__lenis = lenis;
+
         return () => {
+            delete window.__lenis;
             lenis.destroy();
             ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
         };

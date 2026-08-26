@@ -47,7 +47,14 @@ export default function Footer() {
                                 <a
                                     key={link.name}
                                     href={link.href}
-                                    className="group relative text-sm text-[#f4f0e8]/70 transition-colors duration-300 hover:text-[#f4f0e8]"
+                                    data-transition="corner-curtain"
+                                    onClick={(e) => {
+                                        if (typeof window !== "undefined" && window.triggerCornerTransition) {
+                                            e.preventDefault();
+                                            window.triggerCornerTransition(link.href, link.name);
+                                        }
+                                    }}
+                                    className="group relative text-sm text-[#f4f0e8]/70 transition-colors duration-300 hover:text-[#f4f0e8] cursor-pointer"
                                 >
                                     {link.name}
 

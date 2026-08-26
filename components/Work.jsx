@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import projects from "@/data/projects";
 import ProjectCard from "./ProjectCard";
+import CardSpread from "./ui/card-spread";
 
 const categories = [
     "All",
@@ -20,9 +21,16 @@ const categories = [
 export default function Work() {
     const prefersReducedMotion = useReducedMotion();
     const [activeCategory, setActiveCategory] = useState("All");
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [selectedProject, setSelectedProject] = useState(null);
+    const [isForceSpread, setIsForceSpread] = useState(false);
     const [hoveredCardId, setHoveredCardId] = useState(null);
-    const [lastNavDirection, setLastNavDirection] = useState("next"); // 'prev' | 'next'
+
+    // Mobile Carousel State
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [lastNavDirection, setLastNavDirection] = useState("next");
+    const [isMobile, setIsMobile] = useState(false);
+    const [containerWidth, setContainerWidth] = useState(1200);
+    const mobileContainerRef = useRef(null);
 
     const sectionRef = useRef(null);
     const titleHeadingRef = useRef(null);
@@ -35,11 +43,11 @@ export default function Work() {
                 (project) => project.category === activeCategory
             );
 
-    // Ensure currentIndex stays within bounds when filter changes
     const safeIndex = Math.min(currentIndex, Math.max(0, filteredProjects.length - 1));
 
     const handleCategoryChange = (category) => {
         setActiveCategory(category);
+        setSelectedProject(null);
         setCurrentIndex(0);
     };
 
@@ -53,32 +61,54 @@ export default function Work() {
         setCurrentIndex((prev) => Math.min(filteredProjects.length - 1, prev + 1));
     };
 
-    // Calculate center offset so the active card is always in the center
-    const containerRef = useRef(null);
-    const [containerWidth, setContainerWidth] = useState(1200);
-
     // Pixel Reveal Grid Setup
     const [gridConfig, setGridConfig] = useState({ cols: 18, rows: 12 });
     const pixelOverlayRef = useRef(null);
     const tileRefs = useRef([]);
 
+    // Card dimensions for Desktop CardSpread
+    const [cardDimensions, setCardDimensions] = useState({
+        width: 330,
+        height: 450,
+        arc: 40,
+        radius: 860,
+    });
+
     useEffect(() => {
         const updateDimensions = () => {
             if (typeof window !== "undefined") {
-                if (window.innerWidth < 768) {
+                const width = window.innerWidth;
+                const mobile = width < 768;
+                setIsMobile(mobile);
+
+                if (mobile) {
                     setGridConfig({ cols: 10, rows: 14 });
-                } else if (window.innerWidth < 1200) {
+                } else if (width < 1024) {
                     setGridConfig({ cols: 14, rows: 10 });
+                    setCardDimensions({
+                        width: 300,
+                        height: 420,
+                        arc: 36,
+                        radius: 760,
+                    });
                 } else {
                     setGridConfig({ cols: 18, rows: 12 });
+                    setCardDimensions({
+                        width: 330,
+                        height: 450,
+                        arc: 42,
+                        radius: 880,
+                    });
                 }
-                if (containerRef.current) {
-                    setContainerWidth(containerRef.current.offsetWidth || window.innerWidth);
+
+                if (mobileContainerRef.current) {
+                    setContainerWidth(mobileContainerRef.current.offsetWidth || width);
                 } else {
-                    setContainerWidth(window.innerWidth);
+                    setContainerWidth(width);
                 }
             }
         };
+
         updateDimensions();
         window.addEventListener("resize", updateDimensions);
         return () => window.removeEventListener("resize", updateDimensions);
@@ -86,7 +116,7 @@ export default function Work() {
 
     const totalTiles = gridConfig.cols * gridConfig.rows;
 
-    // GSAP ScrollTrigger Pixel Reveal & 3D Typography Animation
+    // GSAP ScrollTrigger Pixel Reveal & 3D Kinetic Typography Animation
     useEffect(() => {
         if (prefersReducedMotion || typeof window === "undefined") return;
 
@@ -99,7 +129,6 @@ export default function Work() {
         if (!section || !overlay || validTiles.length === 0) return;
 
         const ctx = gsap.context(() => {
-            // Initial state: fully opaque dark pixel tiles covering the view
             gsap.set(validTiles, {
                 scale: 1.02,
                 opacity: 1,
@@ -108,14 +137,14 @@ export default function Work() {
             });
             gsap.set(overlay, { display: "grid", opacity: 1 });
 
-            // 1. Pixel-Out ScrollTrigger Timeline: Dissolves the black pixel tiles as Work scrolls into view
+            // 1. Pixel-Out ScrollTrigger Timeline (finishes briskly as section enters)
             const tlPixel = gsap.timeline({
                 scrollTrigger: {
                     trigger: section,
-                    start: "top bottom", // Starts as soon as Work enters from viewport bottom
-                    end: "top 25%",      // Fully dissolved before settling into place
+                    start: "top bottom",
+                    end: "top 75%",
                     pin: false,
-                    scrub: 0.6,
+                    scrub: 0.3,
                     invalidateOnRefresh: true,
                     onLeave: () => {
                         gsap.set(overlay, { display: "none" });
@@ -123,36 +152,31 @@ export default function Work() {
                 },
             });
 
-            // Black screen tiles dissolve away randomly
             tlPixel.to(validTiles, {
                 scale: 0,
                 opacity: 0,
                 borderRadius: "50%",
-                duration: 0.6,
+                duration: 0.4,
                 ease: "power2.inOut",
                 stagger: {
-                    amount: 0.6,
+                    amount: 0.35,
                     from: "random",
                     grid: [gridConfig.rows, gridConfig.cols],
                 },
             }, 0);
 
-            // 2. 3D Kinetic Perspective Typography Animation:
-            // Words flip up from the 3D floor (rotateX: 85deg, translateZ: -120px, blur: 14px) into straight alignment on scroll
+            // 2. 3D Kinetic Perspective Typography Animation (triggers immediately as header enters)
             const wordContainers = titleHeadingRef.current?.querySelectorAll(".route-city-word");
             if (wordContainers && wordContainers.length > 0) {
                 gsap.set(wordContainers, {
                     transformPerspective: 1000,
-                    transformOrigin: "50% 100% -40px",
-                    rotationX: 85,
-                    rotationY: (i) => (i % 2 === 0 ? -10 : 10),
-                    z: -120,
-                    yPercent: 85,
-                    filter: "blur(14px)",
+                    transformOrigin: "50% 100% -20px",
+                    rotationX: 45,
+                    yPercent: 40,
+                    filter: "blur(6px)",
                     opacity: 0,
                 });
 
-                // Reversible 3D text timeline with snappy, fast motion
                 const textTl = gsap.timeline({ paused: true });
 
                 textTl.to(wordContainers, {
@@ -162,19 +186,20 @@ export default function Work() {
                     yPercent: 0,
                     filter: "blur(0px)",
                     opacity: 1,
+                    delay: 0.3, // Starts 0.3s later
                     stagger: {
-                        each: 0.05, // Fast stagger
+                        each: 0.03,
                         ease: "power2.out",
                     },
-                    duration: 0.55, // Snappy, fast 3D flip
+                    duration: 0.38,
                     ease: "power3.out",
                 });
 
                 ScrollTrigger.create({
                     trigger: titleHeadingRef.current,
-                    start: "top 60%",
+                    start: "top 95%", // Triggers immediately as the header enters the bottom of screen
                     onEnter: () => textTl.play(),
-                    onLeaveBack: () => textTl.reverse(), // Reverts back to 3D submerged floor state on scroll up
+                    onLeaveBack: () => textTl.reverse(),
                 });
             }
 
@@ -198,10 +223,11 @@ export default function Work() {
         return () => ctx.revert();
     }, [gridConfig, prefersReducedMotion]);
 
-    const cardWidth = 340;
-    const cardGap = 32;
-    const cardStepPx = cardWidth + cardGap;
-    const trackTranslateX = (containerWidth / 2) - (cardWidth / 2) - (safeIndex * cardStepPx);
+    // Mobile Carousel geometry calculations
+    const mobileCardWidth = 290;
+    const mobileCardGap = 20;
+    const mobileCardStepPx = mobileCardWidth + mobileCardGap;
+    const mobileTrackTranslateX = (containerWidth / 2) - (mobileCardWidth / 2) - (safeIndex * mobileCardStepPx);
 
     return (
         <section
@@ -226,14 +252,14 @@ export default function Work() {
                         ref={(el) => (tileRefs.current[index] = el)}
                         className="w-full h-full bg-[#111111] will-change-transform"
                         style={{
-                            margin: "-0.5px", // Eliminates fractional subpixel gaps
+                            margin: "-0.5px",
                         }}
                     />
                 ))}
             </div>
 
-            {/* 5. Ghost Watermark Number with Scrubbed Rotation and Scale */}
-            <div 
+            {/* Ghost Watermark Number */}
+            <div
                 ref={watermarkRef}
                 className="pointer-events-none absolute right-[-5vw] top-[10%] select-none font-mono text-[22vw] font-black leading-none text-black/[0.03] will-change-transform md:right-[-2vw]"
                 aria-hidden="true"
@@ -242,20 +268,17 @@ export default function Work() {
             </div>
 
             <div className="work-content-inner relative z-10 mx-auto max-w-7xl will-change-transform">
-
                 {/* Header with Masked Split-Word Rise */}
                 <div>
                     <div className="mb-5 flex items-center gap-3">
                         <span className="h-2 w-2 rounded-full bg-[#111111]" />
-
                         <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-black/40 sm:text-xs">
                             02 — Selected Work
                         </span>
                     </div>
 
                     <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-                        {/* 2. 'The Route: Cities' Kinetic Blur-Rise Heading */}
-                        <h2 
+                        <h2
                             ref={titleHeadingRef}
                             className="max-w-4xl text-5xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-6xl md:text-8xl lg:text-[7rem]"
                         >
@@ -280,22 +303,23 @@ export default function Work() {
                         </h2>
 
                         <p className="max-w-xs text-sm leading-relaxed text-black/50">
-                            Explore some of the websites we've designed for different
-                            businesses and industries.
+                            {isMobile
+                                ? "Swipe horizontally or use buttons to explore our portfolio of bespoke websites."
+                                : "Hover over the fanned deck of cards to spread open our portfolio of bespoke digital solutions."}
                         </p>
                     </div>
                 </div>
 
-                {/* Filter Pills */}
+                {/* Filter Pills Bar */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.15 }}
-                    className="mt-16 flex items-center justify-between border-y border-black/10 py-5 md:mt-24"
+                    className="mt-14 flex flex-col gap-4 border-y border-black/10 py-5 sm:flex-row sm:items-center sm:justify-between md:mt-20"
                 >
-                    {/* Filter Pills */}
-                    <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 sm:pb-0">
+                    {/* Category Filter Pills */}
+                    <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
                         {categories.map((category) => {
                             const active = activeCategory === category;
 
@@ -303,11 +327,10 @@ export default function Work() {
                                 <button
                                     key={category}
                                     onClick={() => handleCategoryChange(category)}
-                                    className={`relative rounded-full px-5 py-2.5 text-sm font-medium transition-colors duration-300 ${
-                                        active
+                                    className={`relative rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium transition-colors duration-300 ${active
                                             ? "text-[#f4f0e8]"
                                             : "border border-black/15 text-black/60 hover:border-black/40 hover:text-black"
-                                    }`}
+                                        }`}
                                 >
                                     {active && (
                                         <motion.div
@@ -321,159 +344,205 @@ export default function Work() {
                             );
                         })}
                     </div>
+
+                    {/* Desktop Spread Toggle Button */}
+                    <div className="hidden md:flex items-center gap-3">
+                        <button
+                            onClick={() => setIsForceSpread((prev) => !prev)}
+                            className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${isForceSpread
+                                    ? "border-[#111111] bg-[#111111] text-[#f4f0e8]"
+                                    : "border-black/20 bg-black/5 text-black/70 hover:border-black/40 hover:bg-black/10"
+                                }`}
+                        >
+                            <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                            {isForceSpread ? "Stacked Deck" : "Spread Deck"}
+                        </button>
+                    </div>
                 </motion.div>
 
-                {/* Tilted-Card Carousel Track (Curved semi-circular arc layout, center-anchored) */}
-                <div 
-                    ref={containerRef}
-                    className="tilted-carousel-container relative mt-12 w-full overflow-visible py-12"
-                >
-                    <motion.div
-                        drag="x"
-                        dragConstraints={{
-                            left: (containerWidth / 2) - (cardWidth / 2) - ((filteredProjects.length - 1) * cardStepPx),
-                            right: (containerWidth / 2) - (cardWidth / 2),
-                        }}
-                        onDragEnd={(_, info) => {
-                            if (info.offset.x < -60 && safeIndex < filteredProjects.length - 1) {
-                                handleNext();
-                            } else if (info.offset.x > 60 && safeIndex > 0) {
-                                handlePrev();
-                            }
-                        }}
-                        animate={{
-                            x: prefersReducedMotion ? 0 : trackTranslateX,
-                        }}
-                        transition={{
-                            duration: 0.55,
-                            ease: [0.34, 1.56, 0.64, 1],
-                        }}
-                        className="flex items-center gap-8"
-                    >
-                        <AnimatePresence mode="popLayout">
-                            {filteredProjects.map((project, index) => {
-                                // Semi-circular arc formula
-                                const offsetFromActive = index - safeIndex;
-                                const arcRotation = prefersReducedMotion 
-                                    ? 0 
-                                    : Math.max(-6, Math.min(6, offsetFromActive * 2.8));
+                {/* --- 1. PC / DESKTOP VIEW: React Bits Pro Card Spread Animation --- */}
+                <div className="hidden md:block relative mt-8 w-full overflow-visible">
+                    {filteredProjects.length > 0 ? (
+                        <CardSpread
+                            items={filteredProjects}
+                            cardWidth={cardDimensions.width}
+                            cardHeight={cardDimensions.height}
+                            radius={cardDimensions.radius}
+                            arc={cardDimensions.arc}
+                            closedArc={8}
+                            lift={42}
+                            push={28}
+                            pushReach={2}
+                            stiffness={280}
+                            damping={24}
+                            forceSpread={isForceSpread}
+                            spreadOnHover={true}
+                            selectedId={selectedProject?.id}
+                            onCardClick={(project) => setSelectedProject(project)}
+                            renderCard={(project, { index, total, isHovered, isSpread, isActive }) => (
+                                <ProjectCard
+                                    project={project}
+                                    index={index}
+                                    total={total}
+                                    isHovered={isHovered}
+                                    isActive={isActive}
+                                />
+                            )}
+                        />
+                    ) : (
+                        <div className="py-24 text-center">
+                            <p className="text-black/40">Projects coming soon.</p>
+                        </div>
+                    )}
+                </div>
 
-                                const arcY = prefersReducedMotion 
-                                    ? 0 
-                                    : Math.pow(Math.abs(offsetFromActive), 1.6) * 10;
+                {/* --- 2. MOBILE VIEW: Previous Curved Swipe Carousel Track --- */}
+                <div className="block md:hidden relative mt-8 w-full overflow-visible">
+                    {filteredProjects.length > 0 ? (
+                        <div
+                            ref={mobileContainerRef}
+                            className="tilted-carousel-container relative w-full overflow-visible py-8"
+                        >
+                            <motion.div
+                                drag="x"
+                                dragConstraints={{
+                                    left: (containerWidth / 2) - (mobileCardWidth / 2) - ((filteredProjects.length - 1) * mobileCardStepPx),
+                                    right: (containerWidth / 2) - (mobileCardWidth / 2),
+                                }}
+                                onDragEnd={(_, info) => {
+                                    if (info.offset.x < -40 && safeIndex < filteredProjects.length - 1) {
+                                        handleNext();
+                                    } else if (info.offset.x > 40 && safeIndex > 0) {
+                                        handlePrev();
+                                    }
+                                }}
+                                animate={{
+                                    x: prefersReducedMotion ? 0 : mobileTrackTranslateX,
+                                }}
+                                transition={{
+                                    duration: 0.5,
+                                    ease: [0.34, 1.56, 0.64, 1],
+                                }}
+                                className="flex items-center gap-5"
+                            >
+                                <AnimatePresence mode="popLayout">
+                                    {filteredProjects.map((project, index) => {
+                                        const offsetFromActive = index - safeIndex;
+                                        const arcRotation = prefersReducedMotion
+                                            ? 0
+                                            : Math.max(-5, Math.min(5, offsetFromActive * 2.5));
 
-                                const isActive = index === safeIndex;
-                                const isHovered = hoveredCardId === project.id;
+                                        const arcY = prefersReducedMotion
+                                            ? 0
+                                            : Math.pow(Math.abs(offsetFromActive), 1.5) * 8;
 
-                                return (
-                                    <motion.div
-                                        key={project.id}
-                                        layout
-                                        initial={
-                                            prefersReducedMotion
-                                                ? { opacity: 0 }
-                                                : {
-                                                    opacity: 0,
-                                                    scale: 0.9,
-                                                    rotate: arcRotation,
-                                                    y: arcY + 40,
+                                        const isActive = index === safeIndex;
+                                        const isHovered = hoveredCardId === project.id;
+
+                                        return (
+                                            <motion.div
+                                                key={project.id}
+                                                layout
+                                                initial={
+                                                    prefersReducedMotion
+                                                        ? { opacity: 0 }
+                                                        : {
+                                                            opacity: 0,
+                                                            scale: 0.92,
+                                                            rotate: arcRotation,
+                                                            y: arcY + 30,
+                                                        }
                                                 }
-                                        }
-                                        animate={{
-                                            opacity: 1,
-                                            scale: isActive ? 1.03 : 1,
-                                            rotate: prefersReducedMotion ? 0 : (isHovered ? 0 : arcRotation),
-                                            y: isHovered ? arcY - 12 : arcY,
-                                        }}
-                                        exit={{
-                                            opacity: 0,
-                                            scale: 0.8,
-                                            x: -40,
-                                            transition: { duration: 0.3, ease: "easeIn" },
-                                        }}
-                                        transition={{
-                                            duration: 0.5,
-                                            ease: [0.34, 1.56, 0.64, 1],
-                                        }}
-                                        className="w-[340px] flex-shrink-0"
-                                    >
-                                        <ProjectCard
-                                            project={project}
-                                            index={index}
-                                            total={filteredProjects.length}
-                                            tiltAngle={arcRotation}
-                                            isActive={isActive}
-                                            isHovered={isHovered}
-                                            onHoverStart={() => setHoveredCardId(project.id)}
-                                            onHoverEnd={() => setHoveredCardId(null)}
-                                            onClick={() => setCurrentIndex(index)}
-                                            prefersReducedMotion={prefersReducedMotion}
-                                        />
-                                    </motion.div>
-                                );
-                            })}
-                        </AnimatePresence>
-                    </motion.div>
+                                                animate={{
+                                                    opacity: 1,
+                                                    scale: isActive ? 1.02 : 0.98,
+                                                    rotate: arcRotation,
+                                                    y: arcY,
+                                                }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    scale: 0.85,
+                                                    transition: { duration: 0.25 },
+                                                }}
+                                                transition={{
+                                                    duration: 0.45,
+                                                    ease: [0.34, 1.56, 0.64, 1],
+                                                }}
+                                                className="w-[290px] flex-shrink-0"
+                                                style={{ height: "390px" }}
+                                            >
+                                                <ProjectCard
+                                                    project={project}
+                                                    index={index}
+                                                    total={filteredProjects.length}
+                                                    isActive={isActive}
+                                                    isHovered={isHovered}
+                                                    onHoverStart={() => setHoveredCardId(project.id)}
+                                                    onHoverEnd={() => setHoveredCardId(null)}
+                                                    onClick={() => setCurrentIndex(index)}
+                                                />
+                                            </motion.div>
+                                        );
+                                    })}
+                                </AnimatePresence>
+                            </motion.div>
+
+                            {/* Mobile Carousel Nav Pill Controls */}
+                            <div className="mt-8 flex items-center justify-center gap-4">
+                                <button
+                                    onClick={handlePrev}
+                                    disabled={safeIndex === 0}
+                                    aria-label="Previous project card"
+                                    className={`flex h-10 w-20 items-center justify-center rounded-full border transition-all duration-300 ${safeIndex === 0
+                                            ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
+                                            : lastNavDirection === "prev"
+                                                ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm active:scale-95"
+                                                : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111]"
+                                        }`}
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+
+                                <span className="font-mono text-xs font-semibold text-black/60">
+                                    0{safeIndex + 1} / 0{filteredProjects.length}
+                                </span>
+
+                                <button
+                                    onClick={handleNext}
+                                    disabled={safeIndex >= filteredProjects.length - 1}
+                                    aria-label="Next project card"
+                                    className={`flex h-10 w-20 items-center justify-center rounded-full border transition-all duration-300 ${safeIndex >= filteredProjects.length - 1
+                                            ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
+                                            : lastNavDirection === "next"
+                                                ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm active:scale-95"
+                                                : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111]"
+                                        }`}
+                                >
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M5 12h14M12 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="py-20 text-center">
+                            <p className="text-black/40">Projects coming soon.</p>
+                        </div>
+                    )}
                 </div>
-
-                {/* Bottom Carousel Pill Nav Controls */}
-                <div className="mt-8 flex items-center justify-center gap-4">
-                    <button
-                        onClick={handlePrev}
-                        disabled={safeIndex === 0}
-                        aria-label="Previous card"
-                        className={`flex h-11 w-24 items-center justify-center rounded-full border transition-all duration-300 ${
-                            safeIndex === 0
-                                ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
-                                : lastNavDirection === "prev"
-                                    ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm hover:scale-105"
-                                    : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111] hover:bg-[#111111]/5"
-                        }`}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M19 12H5M12 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    <button
-                        onClick={handleNext}
-                        disabled={safeIndex >= filteredProjects.length - 1}
-                        aria-label="Next card"
-                        className={`flex h-11 w-24 items-center justify-center rounded-full border transition-all duration-300 ${
-                            safeIndex >= filteredProjects.length - 1
-                                ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
-                                : lastNavDirection === "next"
-                                    ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm hover:scale-105"
-                                    : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111] hover:bg-[#111111]/5"
-                        }`}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Empty State */}
-                {filteredProjects.length === 0 && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="py-24 text-center"
-                    >
-                        <p className="text-black/40">
-                            Projects coming soon.
-                        </p>
-                    </motion.div>
-                )}
 
                 {/* Bottom Footer Info */}
-                <div className="mt-14 flex flex-col gap-4 border-t border-black/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-8 flex flex-col gap-4 border-t border-black/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-xs uppercase tracking-[0.15em] text-black/40">
-                        Showing {filteredProjects.length > 0 ? safeIndex + 1 : 0} of {filteredProjects.length} Projects
+                        Showing {filteredProjects.length} {filteredProjects.length === 1 ? "Project" : "Projects"}
                     </p>
 
-                    <p className="text-sm text-black/40">
-                        Swipe or use navigation buttons to browse projects.
+                    <p className="text-xs sm:text-sm text-black/50">
+                        {isMobile
+                            ? "Swipe or tap buttons to navigate through projects"
+                            : "Hover over cards to fan open the deck • Click any card to view details"}
                     </p>
                 </div>
             </div>

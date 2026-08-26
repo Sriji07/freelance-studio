@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -328,4 +329,112 @@ a {
     transform: none !important;
     transition: opacity 0.3s ease-out !important;
   }
-}
+}
+
+/* ==========================================================================
+   CORNER-ORIGIN SLANTED CLIP-PATH PAGE TRANSITION (#page-transition)
+   High-end agency diagonal curtain sweep (O Positive inspired)
+   ========================================================================== */
+
+#page-transition {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#page-transition.active {
+  pointer-events: all !important;
+}
+
+#page-transition .curtain-slice {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f4f0e8; /* Website theme Cream */
+  /* Initial hidden state: collapsed to top-right corner point with diagonal slant */
+  clip-path: polygon(100% 0, 100% 0, 100% 0, 100% 0);
+  -webkit-clip-path: polygon(100% 0, 100% 0, 100% 0, 100% 0);
+  transition: clip-path 0.8s cubic-bezier(0.77, 0, 0.175, 1),
+              -webkit-clip-path 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+  will-change: clip-path, -webkit-clip-path;
+  z-index: 2;
+}
+
+/* Second underlying curtain slice: Deep theme black */
+#page-transition .curtain-slice-dark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #111111;
+  clip-path: polygon(100% 0, 100% 0, 100% 0, 100% 0);
+  -webkit-clip-path: polygon(100% 0, 100% 0, 100% 0, 100% 0);
+  transition: clip-path 0.8s cubic-bezier(0.77, 0, 0.175, 1) 0.08s,
+              -webkit-clip-path 0.8s cubic-bezier(0.77, 0, 0.175, 1) 0.08s;
+  will-change: clip-path, -webkit-clip-path;
+  z-index: 1;
+}
+
+/* Center text badge */
+#page-transition .curtain-text-badge {
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+  transition: opacity 0.4s ease 0.35s, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.35s;
+}
+
+#page-transition.active .curtain-text-badge {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Active sweep: smoothly covers entire screen */
+#page-transition.active .curtain-slice {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+#page-transition.active .curtain-slice-dark {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Exit phase: collapses off gracefully towards bottom-left corner */
+#page-transition.exit .curtain-slice {
+  clip-path: polygon(0 100%, 0 100%, 0 100%, 0 100%);
+  -webkit-clip-path: polygon(0 100%, 0 100%, 0 100%, 0 100%);
+  transition: clip-path 0.75s cubic-bezier(0.77, 0, 0.175, 1),
+              -webkit-clip-path 0.75s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+#page-transition.exit .curtain-slice-dark {
+  clip-path: polygon(0 100%, 0 100%, 0 100%, 0 100%);
+  -webkit-clip-path: polygon(0 100%, 0 100%, 0 100%, 0 100%);
+  transition: clip-path 0.75s cubic-bezier(0.77, 0, 0.175, 1) 0.05s,
+              -webkit-clip-path 0.75s cubic-bezier(0.77, 0, 0.175, 1) 0.05s;
+}
+
+#page-transition.exit .curtain-text-badge {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.96);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #page-transition .curtain-slice,
+  #page-transition .curtain-slice-dark {
+    clip-path: none !important;
+    opacity: 0;
+    transition: opacity 0.3s ease !important;
+  }
+  #page-transition.active .curtain-slice,
+  #page-transition.active .curtain-slice-dark {
+    opacity: 1 !important;
+  }
+}
+
+
