@@ -50,7 +50,7 @@ export default function Hero() {
         const ctx = gsap.context(() => {
             if (prefersReducedMotion) {
                 // Reduced motion fallback: simple fade in
-                gsap.set([line1Ref.current, line2Ref.current, line3TextRef.current, line3BlockRef.current, cardsContainerRef.current, buttonsRef.current, statsRef.current], {
+                gsap.set([line1Ref.current, line2Ref.current, line3TextRef.current, line3BlockRef.current, buttonsRef.current, statsRef.current], {
                     opacity: 1,
                     y: 0,
                     scaleX: 1,
@@ -67,7 +67,7 @@ export default function Hero() {
                 scaleX: 0,
                 transformOrigin: "left center",
             });
-            gsap.set([cardsContainerRef.current, buttonsRef.current, statsRef.current], {
+            gsap.set([buttonsRef.current, statsRef.current], {
                 opacity: 0,
                 y: 20,
             });
@@ -86,7 +86,7 @@ export default function Hero() {
                         scaleX: 0,
                         transformOrigin: "left center",
                     });
-                    gsap.set([cardsContainerRef.current, buttonsRef.current], {
+                    gsap.set(buttonsRef.current, {
                         opacity: 0,
                         y: 18,
                         scale: 0.96,
@@ -121,15 +121,7 @@ export default function Hero() {
                     duration: 0.75,
                 }, 0.38);
 
-                // 5. Team cards, Buttons and stats pop in with slight spring
-                tl.to(cardsContainerRef.current, {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.7,
-                    ease: "back.out(1.2)",
-                }, 0.55);
-
+                // 5. Buttons and stats pop in with slight spring
                 tl.to([buttonsRef.current, statsRef.current], {
                     opacity: 1,
                     y: 0,
@@ -137,7 +129,7 @@ export default function Hero() {
                     stagger: 0.1,
                     duration: 0.65,
                     ease: "back.out(1.2)",
-                }, 0.7);
+                }, 0.55);
             };
 
             // Listen for initial intro reveal completion
@@ -304,53 +296,13 @@ export default function Hero() {
                 </h1>
 
                 {/* =================================================
-                    6. TEAM CARDS (Hover: translateY -4px, avatar scale 1.05, soft shadow 0 20px 40px)
-                ================================================== */}
-                <div ref={cardsContainerRef} className="mt-6 grid gap-4 sm:grid-cols-2 md:mt-8 md:gap-6 max-w-4xl">
-                    {freelancers.map((person) => (
-                        <div
-                            key={person.name}
-                            className="team-card rounded-xl border border-[#111111]/10 bg-transparent p-4 sm:p-5 transition-all duration-300"
-                        >
-                            {/* Profile */}
-                            <div className="flex items-center gap-3">
-                                {/* Photo */}
-                                <div className="team-avatar h-11 w-11 shrink-0 overflow-hidden rounded-full bg-black/10">
-                                    <img
-                                        src={person.image}
-                                        alt={person.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </div>
-
-                                {/* Name + role */}
-                                <div>
-                                    <h3 className="text-sm font-semibold tracking-[-0.02em] text-[#111111] sm:text-base">
-                                        {person.name}
-                                    </h3>
-
-                                    <p className="text-[9px] uppercase tracking-[0.16em] text-[#111111]/50 font-mono">
-                                        {person.role}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            <p className="mt-2.5 text-xs leading-relaxed text-[#111111]/70">
-                                {person.description}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-
-                {/* =================================================
                     4. BUTTON HOVER INTERACTIONS
                     - Primary: White panel sweeps left->right (scaleX 0->1), text turns black, scales 1.03
                     - Secondary: Outline to black fill, scales 1.03
                 ================================================== */}
                 <div
                     ref={buttonsRef}
-                    className="relative z-20 mt-6 flex flex-wrap items-center gap-3 md:mt-8"
+                    className="relative z-20 mt-8 flex flex-wrap items-center gap-3 md:mt-10"
                 >
                     {/* Primary Button */}
                     <a

@@ -57,48 +57,128 @@ export default function Work() {
     const containerRef = useRef(null);
     const [containerWidth, setContainerWidth] = useState(1200);
 
+    // Pixel Reveal Grid Setup
+    const [gridConfig, setGridConfig] = useState({ cols: 18, rows: 12 });
+    const pixelOverlayRef = useRef(null);
+    const tileRefs = useRef([]);
+
     useEffect(() => {
-        const updateWidth = () => {
-            if (containerRef.current) {
-                setContainerWidth(containerRef.current.offsetWidth || window.innerWidth);
-            } else if (typeof window !== "undefined") {
-                setContainerWidth(window.innerWidth);
+        const updateDimensions = () => {
+            if (typeof window !== "undefined") {
+                if (window.innerWidth < 768) {
+                    setGridConfig({ cols: 10, rows: 14 });
+                } else if (window.innerWidth < 1200) {
+                    setGridConfig({ cols: 14, rows: 10 });
+                } else {
+                    setGridConfig({ cols: 18, rows: 12 });
+                }
+                if (containerRef.current) {
+                    setContainerWidth(containerRef.current.offsetWidth || window.innerWidth);
+                } else {
+                    setContainerWidth(window.innerWidth);
+                }
             }
         };
-        updateWidth();
-        window.addEventListener("resize", updateWidth);
-        return () => window.removeEventListener("resize", updateWidth);
+        updateDimensions();
+        window.addEventListener("resize", updateDimensions);
+        return () => window.removeEventListener("resize", updateDimensions);
     }, []);
 
-    // GSAP ScrollTrigger Scrubbing: Split text word reveal + Background Watermark Parallax
+    const totalTiles = gridConfig.cols * gridConfig.rows;
+
+    // GSAP ScrollTrigger Pixel Reveal & 3D Typography Animation
     useEffect(() => {
         if (prefersReducedMotion || typeof window === "undefined") return;
 
         gsap.registerPlugin(ScrollTrigger);
 
+        const section = sectionRef.current;
+        const overlay = pixelOverlayRef.current;
+        const validTiles = tileRefs.current.filter(Boolean);
+
+        if (!section || !overlay || validTiles.length === 0) return;
+
         const ctx = gsap.context(() => {
-            // Split-Text masked word rising reveal
-            const words = titleHeadingRef.current?.querySelectorAll(".split-word-inner");
-            if (words && words.length > 0) {
-                gsap.fromTo(
-                    words,
-                    { yPercent: 100, opacity: 0 },
-                    {
-                        yPercent: 0,
-                        opacity: 1,
-                        stagger: 0.08,
-                        duration: 0.8,
-                        ease: "power3.out",
-                        scrollTrigger: {
-                            trigger: titleHeadingRef.current,
-                            start: "top 90%",
-                            toggleActions: "play none none none",
-                        },
-                    }
-                );
+            // Initial state: fully opaque dark pixel tiles covering the view
+            gsap.set(validTiles, {
+                scale: 1.02,
+                opacity: 1,
+                borderRadius: "0%",
+                transformOrigin: "center center",
+            });
+            gsap.set(overlay, { display: "grid", opacity: 1 });
+
+            // 1. Pixel-Out ScrollTrigger Timeline: Dissolves the black pixel tiles as Work scrolls into view
+            const tlPixel = gsap.timeline({
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top bottom", // Starts as soon as Work enters from viewport bottom
+                    end: "top 25%",      // Fully dissolved before settling into place
+                    pin: false,
+                    scrub: 0.6,
+                    invalidateOnRefresh: true,
+                    onLeave: () => {
+                        gsap.set(overlay, { display: "none" });
+                    },
+                },
+            });
+
+            // Black screen tiles dissolve away randomly
+            tlPixel.to(validTiles, {
+                scale: 0,
+                opacity: 0,
+                borderRadius: "50%",
+                duration: 0.6,
+                ease: "power2.inOut",
+                stagger: {
+                    amount: 0.6,
+                    from: "random",
+                    grid: [gridConfig.rows, gridConfig.cols],
+                },
+            }, 0);
+
+            // 2. 3D Kinetic Perspective Typography Animation:
+            // Words flip up from the 3D floor (rotateX: 85deg, translateZ: -120px, blur: 14px) into straight alignment on scroll
+            const wordContainers = titleHeadingRef.current?.querySelectorAll(".route-city-word");
+            if (wordContainers && wordContainers.length > 0) {
+                gsap.set(wordContainers, {
+                    transformPerspective: 1000,
+                    transformOrigin: "50% 100% -40px",
+                    rotationX: 85,
+                    rotationY: (i) => (i % 2 === 0 ? -10 : 10),
+                    z: -120,
+                    yPercent: 85,
+                    filter: "blur(14px)",
+                    opacity: 0,
+                });
+
+                // Reversible 3D text timeline with snappy, fast motion
+                const textTl = gsap.timeline({ paused: true });
+
+                textTl.to(wordContainers, {
+                    rotationX: 0,
+                    rotationY: 0,
+                    z: 0,
+                    yPercent: 0,
+                    filter: "blur(0px)",
+                    opacity: 1,
+                    stagger: {
+                        each: 0.05, // Fast stagger
+                        ease: "power2.out",
+                    },
+                    duration: 0.55, // Snappy, fast 3D flip
+                    ease: "power3.out",
+                });
+
+                ScrollTrigger.create({
+                    trigger: titleHeadingRef.current,
+                    start: "top 60%",
+                    onEnter: () => textTl.play(),
+                    onLeaveBack: () => textTl.reverse(), // Reverts back to 3D submerged floor state on scroll up
+                });
             }
 
-            // Layered Parallax with subtle rotate (3-5deg) & scale (1 -> 1.1) on background watermark
+            // Layered Parallax with subtle rotate on background watermark
             if (watermarkRef.current) {
                 gsap.to(watermarkRef.current, {
                     rotation: 5,
@@ -106,17 +186,17 @@ export default function Work() {
                     y: 60,
                     ease: "none",
                     scrollTrigger: {
-                        trigger: sectionRef.current,
+                        trigger: section,
                         start: "top bottom",
                         end: "bottom top",
                         scrub: 1,
                     },
                 });
             }
-        }, sectionRef);
+        }, section);
 
         return () => ctx.revert();
-    }, [prefersReducedMotion]);
+    }, [gridConfig, prefersReducedMotion]);
 
     const cardWidth = 340;
     const cardGap = 32;
@@ -127,8 +207,31 @@ export default function Work() {
         <section
             ref={sectionRef}
             id="work"
-            className="relative overflow-hidden bg-[#f4f0e8] px-5 py-24 md:px-10 md:py-32"
+            className="relative min-h-screen overflow-hidden bg-[#f4f0e8] px-5 py-24 md:px-10 md:py-32"
         >
+            {/* Full-Screen Black Layer Screen with Pixel Tile Grid */}
+            <div
+                ref={pixelOverlayRef}
+                className="pointer-events-none absolute inset-0 z-40 h-screen w-full"
+                style={{
+                    gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
+                    gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+                    display: "grid",
+                }}
+                aria-hidden="true"
+            >
+                {Array.from({ length: totalTiles }).map((_, index) => (
+                    <div
+                        key={index}
+                        ref={(el) => (tileRefs.current[index] = el)}
+                        className="w-full h-full bg-[#111111] will-change-transform"
+                        style={{
+                            margin: "-0.5px", // Eliminates fractional subpixel gaps
+                        }}
+                    />
+                ))}
+            </div>
+
             {/* 5. Ghost Watermark Number with Scrubbed Rotation and Scale */}
             <div 
                 ref={watermarkRef}
@@ -138,7 +241,7 @@ export default function Work() {
                 02
             </div>
 
-            <div className="relative z-10 mx-auto max-w-7xl">
+            <div className="work-content-inner relative z-10 mx-auto max-w-7xl will-change-transform">
 
                 {/* Header with Masked Split-Word Rise */}
                 <div>
@@ -151,27 +254,27 @@ export default function Work() {
                     </div>
 
                     <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-                        {/* 2. Split-Text Masked Heading */}
+                        {/* 2. 'The Route: Cities' Kinetic Blur-Rise Heading */}
                         <h2 
                             ref={titleHeadingRef}
                             className="max-w-4xl text-5xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-6xl md:text-8xl lg:text-[7rem]"
                         >
                             <span className="inline-block overflow-hidden pb-1">
-                                <span className="split-word-inner inline-block">Work</span>
+                                <span className="route-city-word inline-block will-change-transform">Work</span>
                             </span>{" "}
                             <span className="inline-block overflow-hidden pb-1">
-                                <span className="split-word-inner inline-block">made</span>
+                                <span className="route-city-word inline-block will-change-transform">made</span>
                             </span>
                             <br />
-                            <span className="text-black/25">
+                            <span className="text-black/30">
                                 <span className="inline-block overflow-hidden pb-1">
-                                    <span className="split-word-inner inline-block">for</span>
+                                    <span className="route-city-word inline-block will-change-transform">for</span>
                                 </span>{" "}
                                 <span className="inline-block overflow-hidden pb-1">
-                                    <span className="split-word-inner inline-block">real</span>
+                                    <span className="route-city-word inline-block will-change-transform">real</span>
                                 </span>{" "}
                                 <span className="inline-block overflow-hidden pb-1">
-                                    <span className="split-word-inner inline-block">businesses.</span>
+                                    <span className="route-city-word inline-block will-change-transform">businesses.</span>
                                 </span>
                             </span>
                         </h2>
@@ -249,17 +352,12 @@ export default function Work() {
                     >
                         <AnimatePresence mode="popLayout">
                             {filteredProjects.map((project, index) => {
-                                // Semi-circular arc formula:
-                                // Cards to the left tilt negative, cards to the right tilt positive
-                                // Distance from active center creates vertical curved droop (Y offset)
+                                // Semi-circular arc formula
                                 const offsetFromActive = index - safeIndex;
-                                
-                                // Progressive tilt across the visible arc
                                 const arcRotation = prefersReducedMotion 
                                     ? 0 
                                     : Math.max(-6, Math.min(6, offsetFromActive * 2.8));
 
-                                // Concave arch: active center is highest, outer edges dip lower or follow natural arc
                                 const arcY = prefersReducedMotion 
                                     ? 0 
                                     : Math.pow(Math.abs(offsetFromActive), 1.6) * 10;
@@ -318,7 +416,7 @@ export default function Work() {
                     </motion.div>
                 </div>
 
-                {/* Bottom Carousel Pill Nav Controls (Clean black/cream design system matching the rest of the site) */}
+                {/* Bottom Carousel Pill Nav Controls */}
                 <div className="mt-8 flex items-center justify-center gap-4">
                     <button
                         onClick={handlePrev}

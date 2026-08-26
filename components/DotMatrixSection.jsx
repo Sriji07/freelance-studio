@@ -4,6 +4,23 @@ import React from "react";
 import { motion } from "framer-motion";
 import DotMatrixText from "@/components/ui/dot-text";
 
+const teamMembers = [
+  {
+    name: "Srijita Mallick",
+    role: "Designer & Developer",
+    image: "/team/you.jpg",
+    description:
+      "I focus on creating clean, responsive interfaces that make businesses look professional and easy to discover online.",
+  },
+  {
+    name: "Shubhradip Saha",
+    role: "Designer & Developer",
+    image: "/team/friend.jpg",
+    description:
+      "I turn ideas into polished digital experiences, focusing on visual design, usability and the details that make a website feel unique.",
+  },
+];
+
 export default function DotMatrixSection() {
   return (
     <section className="relative w-full overflow-hidden bg-[#111111] py-24 md:py-32 border-t border-[#f4f0e8]/10 select-none">
@@ -15,7 +32,7 @@ export default function DotMatrixSection() {
         {/* Section Tag */}
         <div className="mb-8 flex items-center justify-center gap-3">
           <span className="h-2 w-2 rounded-full bg-[#f4f0e8]" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#f4f0e8]/40 sm:text-xs">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#f4f0e8]/40 sm:text-xs font-mono">
             04 — The Philosophy
           </span>
         </div>
@@ -28,7 +45,7 @@ export default function DotMatrixSection() {
           transition={{ duration: 0.8 }}
           className="text-center"
         >
-          <p className="mx-auto max-w-xl text-xs uppercase tracking-[0.2em] text-[#f4f0e8]/40 sm:text-sm">
+          <p className="mx-auto max-w-xl text-xs uppercase tracking-[0.2em] text-[#f4f0e8]/40 sm:text-sm font-mono">
             From concept to craft to final launch
           </p>
         </motion.div>
@@ -39,7 +56,7 @@ export default function DotMatrixSection() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative mx-auto mt-8 flex h-52 w-full max-w-5xl items-center justify-center sm:h-64 md:h-80"
+          className="relative mx-auto mt-8 flex h-48 w-full max-w-5xl items-center justify-center sm:h-60 md:h-72"
         >
           <DotMatrixText
             text={["DESIGN", "DEVELOP", "DIVE"]}
@@ -56,13 +73,58 @@ export default function DotMatrixSection() {
         </motion.div>
 
         {/* Bottom subtle indicator */}
-        <div className="mt-8 flex justify-center items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#f4f0e8]/20">
+        <div className="mt-6 flex justify-center items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[#f4f0e8]/20 font-mono">
           <span>Design</span>
           <span>•</span>
           <span>Develop</span>
           <span>•</span>
           <span>Dive</span>
         </div>
+
+        {/* =====================================================
+            TEAM PROFILE CARDS (Moved cleanly below the philosophy stage)
+        ====================================================== */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mt-16 sm:mt-20 mx-auto grid max-w-4xl gap-5 sm:grid-cols-2"
+        >
+          {teamMembers.map((person) => (
+            <div
+              key={person.name}
+              className="cursor-target group relative rounded-2xl border border-[#f4f0e8]/10 bg-[#f4f0e8]/[0.02] p-5 sm:p-6 backdrop-blur-sm transition-all duration-300 hover:border-[#f4f0e8]/25 hover:bg-[#f4f0e8]/[0.04] hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+            >
+              {/* Profile Header */}
+              <div className="flex items-center gap-3.5">
+                {/* Avatar with subtle border glow */}
+                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-[#f4f0e8]/20 bg-[#f4f0e8]/5 transition-transform duration-300 group-hover:scale-105">
+                  <img
+                    src={person.image}
+                    alt={person.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                {/* Name & Role */}
+                <div>
+                  <h3 className="text-base font-semibold tracking-[-0.02em] text-[#f4f0e8]">
+                    {person.name}
+                  </h3>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-[#f4f0e8]/50 font-mono">
+                    {person.role}
+                  </p>
+                </div>
+              </div>
+
+              {/* Bio / Description */}
+              <p className="mt-3.5 text-xs leading-relaxed text-[#f4f0e8]/60">
+                {person.description}
+              </p>
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );

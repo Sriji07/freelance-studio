@@ -1,5 +1,6 @@
 import "./globals.css";
 import CustomCursor from "@/components/CustomCursor";
+import TargetCursor from "@/components/TargetCursor";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import ScrollProgressBar from "@/components/ScrollProgressBar";
 import GSAPScrollObserver from "@/components/GSAPScrollObserver";
@@ -30,6 +31,15 @@ export default function RootLayout({ children }) {
             <GSAPScrollObserver />
             <ScrollProgressBar />
             <CustomCursor />
+            <TargetCursor
+              targetSelector=".cursor-target"
+              sectionSelector="#services"
+              spinDuration={2}
+              hideDefaultCursor={false}
+              hoverDuration={0.2}
+              parallaxOn={true}
+              cursorColor="#ffffff"
+            />
             {children}
           </SmoothScrollProvider>
         </SplineStarfieldDiveIntro>
