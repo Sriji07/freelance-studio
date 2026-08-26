@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import IndustryPill3D from "./IndustryPill3D";
 
 const industries = [
     "Gyms",
@@ -139,7 +142,7 @@ export default function Services() {
         <section
             ref={sectionRef}
             id="services"
-            className="relative overflow-hidden bg-[#111111] px-5 py-24 text-[#f4f0e8] md:px-10 md:py-32"
+            className="relative overflow-hidden bg-[#111111] px-5 pt-24 pb-12 text-[#f4f0e8] md:px-10 md:pt-32 md:pb-16"
         >
             {/* Background Ambient Glow that revolves around the core */}
             <motion.div
@@ -234,7 +237,7 @@ export default function Services() {
                                 delay: 0.18,
                                 ease: [0.22, 1, 0.36, 1],
                             }}
-                            className="relative mt-2 inline-block cursor-pointer text-center"
+                            className="cursor-target relative mt-2 inline-block cursor-pointer text-center"
                         >
                             {/* 3D Tilting Core Container */}
                             <motion.div
@@ -331,34 +334,44 @@ export default function Services() {
                     </h2>
                 </div>
 
-                {/* Industries ("Who we build for") */}
+                {/* Industries ("Who we build for") — Enlarged & 3D Interactive */}
                 <div
                     ref={whoWeBuildForRef}
-                    className="mt-20 border-t border-[#f4f0e8]/10 pt-8 md:mt-28"
+                    className="mt-24 border-t border-[#f4f0e8]/10 pt-12 md:mt-36 md:pt-16"
                 >
-                    <div className="reveal-heading-intro mb-7 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div className="reveal-heading-intro mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div>
-                            <p className="text-sm font-medium text-[#f4f0e8]">
-                                Who we build for
-                            </p>
+                            <div className="mb-3 flex items-center gap-2.5">
+                                <span className="h-2 w-2 rounded-full bg-[#f4f0e8] animate-pulse shadow-[0_0_8px_rgba(244,240,232,0.8)]" />
+                                <span className="font-mono text-xs font-semibold tracking-[0.2em] text-[#f4f0e8]/50 uppercase">
+                                    Target Industries
+                                </span>
+                            </div>
 
-                            <p className="mt-1 max-w-md text-sm text-[#f4f0e8]/40">
-                                From local businesses to growing brands, we create websites
-                                tailored to different industries.
+                            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#f4f0e8]">
+                                Who we build for
+                            </h3>
+
+                            <p className="mt-3 max-w-xl text-base sm:text-lg text-[#f4f0e8]/50 leading-relaxed">
+                                From boutique lifestyle businesses to fast-scaling brands, we craft tailored digital experiences designed specifically for your industry.
                             </p>
+                        </div>
+
+                        <div className="hidden lg:block text-right">
+                            <span className="text-xs font-mono text-[#f4f0e8]/30 uppercase tracking-widest">
+                                06 Core Niches
+                            </span>
                         </div>
                     </div>
 
-                    {/* Industry pills */}
-                    <div className="flex flex-wrap gap-3">
+                    {/* 3D Interactive Animated Industry Options */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5 pt-2">
                         {industries.map((industry, index) => (
-                            <button
+                            <IndustryPill3D
                                 key={industry}
-                                style={{ "--pill-delay": `${index * 70}ms` }}
-                                className="reveal-pill group rounded-full border border-[#f4f0e8]/20 px-5 py-2.5 text-sm text-[#f4f0e8]/70 transition-all duration-300 hover:border-[#f4f0e8] hover:bg-[#f4f0e8] hover:text-[#111111]"
-                            >
-                                {industry}
-                            </button>
+                                name={industry}
+                                index={index}
+                            />
                         ))}
                     </div>
                 </div>
@@ -371,7 +384,7 @@ export default function Services() {
                             ref={(el) => {
                                 serviceRowRefs.current[index] = el;
                             }}
-                            className="reveal-row relative overflow-hidden"
+                            className="cursor-target reveal-row relative overflow-hidden rounded-lg px-3 -mx-3 transition-colors duration-200 hover:bg-[#f4f0e8]/[0.03]"
                         >
                             {/* Animated divider line leading the row */}
                             <div className="reveal-divider h-px bg-[#f4f0e8]/10" />
@@ -419,7 +432,7 @@ export default function Services() {
                     <motion.a
                         href="#work"
                         whileHover={{ x: 5 }}
-                        className="hidden text-sm font-medium text-[#f4f0e8] md:block"
+                        className="cursor-target hidden text-sm font-medium text-[#f4f0e8] md:block"
                     >
                         Explore our work ↗
                     </motion.a>

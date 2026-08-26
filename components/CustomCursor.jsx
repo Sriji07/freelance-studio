@@ -42,11 +42,15 @@ export default function CustomCursor() {
 
         let rafId;
 
-        // Scope detection helper: active only in Hero (#about) and Portfolio/Work (#work)
+        // Scope detection helper: active in Hero (#about) and Portfolio/Work (#work), but NOT in #services
         const isScoped = (target) => {
             if (!target) return false;
+            // If inside #services, let TargetCursor take over
+            if (target.closest && target.closest("#services")) {
+                return false;
+            }
             return Boolean(
-                target.closest && (target.closest("#about") || target.closest("#work"))
+                target.closest && (target.closest("#about") || target.closest("#work") || target.closest("#contact") || target.closest("header") || target.closest("nav") || target.closest("footer"))
             );
         };
 
