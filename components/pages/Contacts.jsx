@@ -27,7 +27,7 @@ export default function Contact() {
     const prefersReducedMotion = useReducedMotion();
     const headingRef = useRef(null);
     const isInView = useInView(headingRef, { once: true, amount: 0.3 });
-    
+
     // Typewriter state
     const [typedText, setTypedText] = useState(prefersReducedMotion ? FULL_TEXT : "");
     const [typingComplete, setTypingComplete] = useState(Boolean(prefersReducedMotion));
@@ -119,11 +119,11 @@ export default function Contact() {
 
                         <br />
                         {/* Subtext: Slow, heavy, cinematic drift into place with extra breathing room */}
-                        <motion.span 
+                        <motion.span
                             initial={{ opacity: 0, y: 32 }}
                             animate={typingComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: 32 }}
-                            transition={{ 
-                                duration: 1.2, 
+                            transition={{
+                                duration: 1.2,
                                 ease: [0.16, 1, 0.3, 1], // Smooth cinematic expo-out curve
                                 delay: 0.65 // Gives the user time to register the question mark
                             }}
@@ -293,4 +293,4 @@ export default function Contact() {
             </div>
         </section>
     );
-}
+}
