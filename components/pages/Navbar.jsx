@@ -94,14 +94,22 @@ export default function Navbar() {
                             e.preventDefault();
                             window.dispatchEvent(new CustomEvent("trigger-velvet-top"));
                         }}
-                        className="relative z-50 flex flex-col justify-center cursor-pointer"
+                        className="relative z-50 flex items-center gap-1.5 cursor-pointer p-0"
                     >
-                        <span className="text-2xl font-black leading-none tracking-[-0.06em] sm:text-3xl md:text-5xl">
-                            DIVE<span className="opacity-30">.</span>
-                        </span>
-                        <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.18em] text-black/60 sm:text-[10px] md:text-[11px]">
-                            Delve into design. Experience the immersive
-                        </span>
+                        <img
+                            src="/images/logo.png"
+                            alt="DIVE logo"
+                            className="h-15 w-25 object-contain sm:h-12 sm:w-24 md:h-16 md:w-32"
+                        />
+
+                        {/* <div className="flex flex-col justify-center p-0">
+                            <p className="mt-0 text-[8px] font-semibold uppercase tracking-[0.12em] text-black/60 sm:text-[9px] md:text-[10px]">
+                                Delve into design.
+                            </p>
+                            <p className="mt-0 text-[8px] font-semibold uppercase tracking-[0.12em] text-black/60 sm:text-[9px] md:text-[10px]">
+                                Experience the immersive
+                            </p>
+                        </div> */}
                     </a>
 
                     {/* Desktop Navigation with 5. GSAP/CSS Nav Link 2px Underline scaleX 0->1 */}

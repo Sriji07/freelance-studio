@@ -3,23 +3,22 @@
 import { useEffect, useRef } from "react";
 import { useReducedMotion } from "framer-motion";
 import gsap from "gsap";
+//import OptionWheel from "@/components/ui/OptionWheel";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+//import Card from "@/components/Card";
+//import reviews from "@/data/reviews";
 
-const freelancers = [
-    {
-        name: "Srijita Mallick",
-        role: "Designer & Developer",
-        image: "/team/you.jpg",
-        description:
-            "I focus on creating clean, responsive interfaces that make businesses look professional and easy to discover online.",
-    },
-    {
-        name: "Shubhradip Saha",
-        role: "Designer & Developer",
-        image: "/team/friend.jpg",
-        description:
-            "I turn ideas into polished digital experiences, focusing on visual design, usability and the details that make a website feel unique.",
-    },
+
+
+const wheelItems = [
+    "Web Design",
+    "UI / UX",
+    "Brand Identity",
+    "Creative Development",
+    "Landing Pages",
+    "Responsive Design",
+    "Digital Experiences",
+    "E-Commerce",
 ];
 
 export default function Hero() {
@@ -27,19 +26,12 @@ export default function Hero() {
     const heroRef = useRef(null);
     const line1Ref = useRef(null);
     const line2Ref = useRef(null);
-    const line3Ref = useRef(null);
     const line3BlockRef = useRef(null);
     const line3TextRef = useRef(null);
-    const circleGraphicRef = useRef(null);
-    const cardsContainerRef = useRef(null);
     const buttonsRef = useRef(null);
     const statsRef = useRef(null);
 
     // Mouse parallax tracking ref
-    const mousePos = useRef({ x: 0, y: 0 });
-    const targetPos = useRef({ x: 0, y: 0 });
-    const currentPos = useRef({ x: 0, y: 0 });
-    const rafId = useRef(null);
 
     // 1. GSAP Hero Text Reveal & ScrollTrigger Setup
     useEffect(() => {
@@ -153,16 +145,6 @@ export default function Hero() {
             // Safety timeout: ensure initial animation plays after 2.5s even if event was missed
             const timer = setTimeout(handleInitialReveal, 2500);
 
-            // 2. Continuous 90s slow rotation on circle graphic
-            if (circleGraphicRef.current) {
-                gsap.to(circleGraphicRef.current, {
-                    rotation: 360,
-                    duration: 90,
-                    ease: "none",
-                    repeat: -1,
-                });
-            }
-
             // ScrollTrigger subtle hero dock/fade
             ScrollTrigger.create({
                 trigger: heroRef.current,
@@ -189,45 +171,6 @@ export default function Hero() {
         return () => ctx.revert();
     }, [prefersReducedMotion]);
 
-    // 2. Mouse Parallax on Background Circle Graphic (Damping factor ~0.05, max 15px)
-    useEffect(() => {
-        if (prefersReducedMotion || typeof window === "undefined") return;
-
-        const handleMouseMove = (e) => {
-            const { innerWidth, innerHeight } = window;
-            const x = (e.clientX / innerWidth - 0.5) * 2; // -1 to 1
-            const y = (e.clientY / innerHeight - 0.5) * 2; // -1 to 1
-
-            targetPos.current = {
-                x: x * 15,
-                y: y * 15,
-            };
-        };
-
-        const updateParallax = () => {
-            // Lerp smoothing (damping ~0.05)
-            currentPos.current.x += (targetPos.current.x - currentPos.current.x) * 0.05;
-            currentPos.current.y += (targetPos.current.y - currentPos.current.y) * 0.05;
-
-            if (circleGraphicRef.current) {
-                gsap.set(circleGraphicRef.current, {
-                    x: currentPos.current.x,
-                    y: currentPos.current.y,
-                });
-            }
-
-            rafId.current = requestAnimationFrame(updateParallax);
-        };
-
-        window.addEventListener("mousemove", handleMouseMove, { passive: true });
-        rafId.current = requestAnimationFrame(updateParallax);
-
-        return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-            if (rafId.current) cancelAnimationFrame(rafId.current);
-        };
-    }, [prefersReducedMotion]);
-
     return (
         <section
             ref={heroRef}
@@ -235,22 +178,49 @@ export default function Hero() {
             className="relative min-h-screen flex flex-col justify-between overflow-hidden bg-[#f4f0e8] px-5 pb-8 pt-20 sm:pt-24 md:px-10 md:pb-10 md:pt-28"
         >
             {/* =====================================================
-                2. AMBIENT BACKGROUND MOTION (Continuous 90s rotation + Smooth 15px lerped mouse parallax)
+                RIGHT-SIDE AUTO-ROTATING OPTION WHEEL
             ====================================================== */}
-            <div
-                ref={circleGraphicRef}
-                className="pointer-events-none absolute right-[-140px] top-[12%] z-0 h-[380px] w-[380px] md:right-[-100px] md:top-[10%] md:h-[540px] md:w-[540px] will-change-transform opacity-80"
-                aria-hidden="true"
+            {/* <div
+                className="pointer-events-auto absolute right-[10px] top-1/2 z-10 hidden h-[900px] w-[900px] -translate-y-1/2 md:block lg:right-[0px] lg:h-[980px] lg:w-[980px]"
+                aria-label="Client testimonials"
             >
-                {/* Static/smooth outer ring */}
-                <div className="absolute inset-0 rounded-full border border-black/[0.07]" />
+                <OptionWheel
+                    items={reviews}
+                    renderItem={(review, index, isActive) => (
+                        <Card
+                            review={review}
+                            index={index}
+                            isActive={isActive}
+                        />
+                    )}
+                    defaultSelected={0}
+                    side="right"
+                    textColor="#111111"
+                    activeColor="#111111"
 
-                {/* Dashed concentric arc ring */}
-                <div className="absolute inset-[30px] rounded-full border border-dashed border-black/[0.08] md:inset-[45px]" />
+                    fontSize={1}
+                    spacing={1}
 
-                {/* Inner ambient accent ring */}
-                <div className="absolute inset-[70px] rounded-full border border-black/[0.04] md:inset-[95px]" />
-            </div>
+                    curve={2.0}
+                    tilt={9}
+
+                    blur={1.2}
+                    fade={0.16}
+                    minOpacity={0.1}
+
+                    smoothing={300}
+
+                    inset={150}
+                    itemHeight={170}
+
+                    loop={true}
+                    draggable={true}
+                    autoRotate={true}
+                    autoRotateInterval={3000}
+
+                    className="font-serif"
+                />
+            </div> */}
 
             {/* =====================================================
                 MAIN CONTENT (Optimized to fit viewport gracefully)
@@ -352,19 +322,19 @@ export default function Hero() {
                     {/* Stats */}
                     <div className="flex flex-wrap items-center gap-3 md:gap-6">
                         <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/50 sm:text-xs">
-                            02 Designers
+                            02 Developers
                         </span>
 
                         <span className="h-1 w-1 rounded-full bg-[#111111]/20" />
 
                         <span className="text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/50 sm:text-xs">
-                            Multiple Industries
+                            Delve into design.
                         </span>
 
                         <span className="hidden h-1 w-1 rounded-full bg-[#111111]/20 sm:block" />
 
                         <span className="hidden text-[9px] font-medium uppercase tracking-[0.18em] text-[#111111]/50 sm:block sm:text-xs">
-                            Built With Purpose
+                            Experience the immersive
                         </span>
                     </div>
 

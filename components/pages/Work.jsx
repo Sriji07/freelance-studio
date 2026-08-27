@@ -5,8 +5,8 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import projects from "@/data/projects";
-import ProjectCard from "./ProjectCard";
-import CardSpread from "./ui/card-spread";
+import ProjectCard from "../ProjectCard";
+import CardSpread from "../ui/card-spread";
 
 const categories = [
     "All",
@@ -328,8 +328,8 @@ export default function Work() {
                                     key={category}
                                     onClick={() => handleCategoryChange(category)}
                                     className={`relative rounded-full px-4 sm:px-5 py-2 text-xs sm:text-sm font-medium transition-colors duration-300 ${active
-                                            ? "text-[#f4f0e8]"
-                                            : "border border-black/15 text-black/60 hover:border-black/40 hover:text-black"
+                                        ? "text-[#f4f0e8]"
+                                        : "border border-black/15 text-black/60 hover:border-black/40 hover:text-black"
                                         }`}
                                 >
                                     {active && (
@@ -350,8 +350,8 @@ export default function Work() {
                         <button
                             onClick={() => setIsForceSpread((prev) => !prev)}
                             className={`flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-all duration-300 ${isForceSpread
-                                    ? "border-[#111111] bg-[#111111] text-[#f4f0e8]"
-                                    : "border-black/20 bg-black/5 text-black/70 hover:border-black/40 hover:bg-black/10"
+                                ? "border-[#111111] bg-[#111111] text-[#f4f0e8]"
+                                : "border-black/20 bg-black/5 text-black/70 hover:border-black/40 hover:bg-black/10"
                                 }`}
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
@@ -494,10 +494,10 @@ export default function Work() {
                                     disabled={safeIndex === 0}
                                     aria-label="Previous project card"
                                     className={`flex h-10 w-20 items-center justify-center rounded-full border transition-all duration-300 ${safeIndex === 0
-                                            ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
-                                            : lastNavDirection === "prev"
-                                                ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm active:scale-95"
-                                                : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111]"
+                                        ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
+                                        : lastNavDirection === "prev"
+                                            ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm active:scale-95"
+                                            : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111]"
                                         }`}
                                 >
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -514,10 +514,10 @@ export default function Work() {
                                     disabled={safeIndex >= filteredProjects.length - 1}
                                     aria-label="Next project card"
                                     className={`flex h-10 w-20 items-center justify-center rounded-full border transition-all duration-300 ${safeIndex >= filteredProjects.length - 1
-                                            ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
-                                            : lastNavDirection === "next"
-                                                ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm active:scale-95"
-                                                : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111]"
+                                        ? "cursor-not-allowed border-[#111111]/10 bg-transparent text-[#111111]/20"
+                                        : lastNavDirection === "next"
+                                            ? "border-[#111111] bg-[#111111] text-[#f4f0e8] shadow-sm active:scale-95"
+                                            : "border-[#111111]/25 bg-transparent text-[#111111] hover:border-[#111111]"
                                         }`}
                                 >
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

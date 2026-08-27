@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import IndustryPill3D from "./IndustryPill3D";
+import IndustryPill3D from "../IndustryPill3D";
 
 const industries = [
     "Gyms",
@@ -167,8 +167,8 @@ export default function Services() {
                 {/* Conceptual "Around" Headline Section (Centered) */}
                 <div className="relative mx-auto flex flex-col items-center text-center">
 
-                    {/* Leading Cue Dot with expanding orbital wave */}
-                    <div className="mb-6 flex items-center justify-center gap-3">
+                    {/* Leading Cue Dot */}
+                    <div className="mb-4 flex items-center justify-center gap-2">
                         <div className="relative flex items-center justify-center">
                             <motion.span
                                 initial={{ scale: 0, opacity: 0 }}
@@ -179,10 +179,9 @@ export default function Services() {
                                     stiffness: 400,
                                     damping: 18,
                                 }}
-                                className="h-2.5 w-2.5 rounded-full bg-[#f4f0e8]"
+                                className="h-2 w-2 rounded-full bg-[#f4f0e8]"
                             />
 
-                            {/* Orbiting ripple circle */}
                             <motion.span
                                 animate={{
                                     scale: [1, 2.8],
@@ -193,16 +192,17 @@ export default function Services() {
                                     repeat: Infinity,
                                     ease: "easeOut",
                                 }}
-                                className="absolute h-2.5 w-2.5 rounded-full border border-[#f4f0e8]"
+                                className="absolute h-2 w-2 rounded-full border border-[#f4f0e8]"
                             />
                         </div>
 
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#f4f0e8]/40 sm:text-xs">
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#f4f0e8]/40 sm:text-[10px]">
                             Tailored Architecture
                         </span>
                     </div>
 
-                    <h2 className="mx-auto max-w-5xl text-center text-5xl font-bold leading-[0.92] tracking-[-0.06em] sm:text-6xl md:text-8xl lg:text-[7rem]">
+                    <h2 className="mx-auto max-w-4xl text-center text-4xl font-bold leading-[0.94] tracking-[-0.055em] sm:text-5xl md:text-6xl lg:text-[5.5rem]">
+
                         {/* LINE 1: Websites built */}
                         <motion.div
                             style={{
@@ -220,116 +220,101 @@ export default function Services() {
                             Websites built
                         </motion.div>
 
-                        {/* LINE 2: "around your business." with animated 3D elliptical orbit wrap */}
+                        {/* LINE 2: around your business. */}
                         <motion.div
-                            ref={orbitContainerRef}
-                            onMouseMove={handleMouseMove}
-                            onMouseLeave={handleMouseLeave}
-                            style={{
-                                y: prefersReducedMotion ? 0 : line2Y,
-                                perspective: 1000,
+                            animate={{
+                                rotateX: tilt.rotateX,
+                                rotateY: tilt.rotateY,
+                                scale: tilt.scale,
                             }}
-                            initial={{ opacity: 0, y: 35 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.3 }}
                             transition={{
-                                duration: 0.85,
-                                delay: 0.18,
-                                ease: [0.22, 1, 0.36, 1],
+                                type: "spring",
+                                stiffness: 300,
+                                damping: 25,
                             }}
-                            className="cursor-target relative mt-2 inline-block cursor-pointer text-center"
+                            className="relative inline-block px-5 py-4 sm:px-7 sm:py-5"
                         >
-                            {/* 3D Tilting Core Container */}
-                            <motion.div
-                                animate={{
-                                    rotateX: tilt.rotateX,
-                                    rotateY: tilt.rotateY,
-                                    scale: tilt.scale,
-                                }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 300,
-                                    damping: 25,
-                                }}
-                                className="relative inline-block px-3 py-1"
-                            >
-                                <span className="relative z-10 text-[#f4f0e8]/35 transition-colors duration-500 hover:text-[#f4f0e8]/80">
-                                    <span className="italic font-normal mr-3 text-[#f4f0e8]/50">around</span>
-                                    <span className="text-[#f4f0e8]/45">your business.</span>
+                            <span className="relative z-10 block text-center text-4xl font-normal leading-[0.95] tracking-[-0.04em] text-[#f4f0e8]/35 transition-colors duration-500 hover:text-[#f4f0e8]/80 sm:text-5xl md:text-6xl lg:text-7xl">
+                                <span className="block italic text-[#f4f0e8]/50">
+                                    around
                                 </span>
 
-                                {/* THE ORBITAL WRAP: SVG Ring that encircles the words */}
-                                <svg
-                                    className="pointer-events-none absolute -inset-x-8 -inset-y-4 h-[calc(100%+2rem)] w-[calc(100%+4rem)] sm:-inset-x-12 sm:-inset-y-5 sm:h-[calc(100%+2.5rem)] sm:w-[calc(100%+6rem)]"
-                                    viewBox="0 0 420 110"
-                                    fill="none"
-                                    preserveAspectRatio="none"
-                                >
-                                    {/* Primary Orbit Trace Line drawing around the text */}
-                                    <motion.ellipse
-                                        cx="210"
-                                        cy="55"
-                                        rx="200"
-                                        ry="46"
-                                        stroke="rgba(244, 240, 232, 0.22)"
-                                        strokeWidth="1.5"
-                                        strokeDasharray="6 8"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        whileInView={{ pathLength: 1, opacity: 1 }}
-                                        viewport={{ once: true }}
-                                        transition={{
-                                            duration: 1.6,
-                                            delay: 0.4,
-                                            ease: "easeInOut",
-                                        }}
-                                    />
+                                <span className="block whitespace-nowrap text-[#f4f0e8]/45">
+                                    your business.
+                                </span>
+                            </span>
 
-                                    {/* Glowing Accent Arc sweeping around */}
-                                    <motion.ellipse
-                                        cx="210"
-                                        cy="55"
-                                        rx="200"
-                                        ry="46"
-                                        stroke="rgba(244, 240, 232, 0.85)"
-                                        strokeWidth="2"
-                                        strokeDasharray="60 300"
-                                        animate={
-                                            prefersReducedMotion
-                                                ? {}
-                                                : {
-                                                    strokeDashoffset: [0, -360],
-                                                }
-                                        }
+                            {/* ORBITAL WRAP */}
+                            <svg
+                                className="pointer-events-none absolute left-1/2 top-1/2 h-[calc(100%+2rem)] w-[calc(100%+3rem)] -translate-x-1/2 -translate-y-1/2 sm:h-[calc(100%+2.5rem)] sm:w-[calc(100%+4rem)]"
+                                viewBox="0 0 420 150"
+                                fill="none"
+                                preserveAspectRatio="none"
+                            >
+                                {/* Primary Orbit Trace Line */}
+                                <motion.ellipse
+                                    cx="210"
+                                    cy="75"
+                                    rx="190"
+                                    ry="62"
+                                    stroke="rgba(244, 240, 232, 0.22)"
+                                    strokeWidth="1.5"
+                                    strokeDasharray="6 8"
+                                    initial={{ pathLength: 0, opacity: 0 }}
+                                    whileInView={{ pathLength: 1, opacity: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{
+                                        duration: 1.6,
+                                        delay: 0.4,
+                                        ease: "easeInOut",
+                                    }}
+                                />
+
+                                {/* Glowing Accent Arc */}
+                                <motion.ellipse
+                                    cx="210"
+                                    cy="75"
+                                    rx="190"
+                                    ry="62"
+                                    stroke="rgba(244, 240, 232, 0.85)"
+                                    strokeWidth="2"
+                                    strokeDasharray="60 300"
+                                    animate={
+                                        prefersReducedMotion
+                                            ? {}
+                                            : {
+                                                strokeDashoffset: [0, -360],
+                                            }
+                                    }
+                                    transition={{
+                                        duration: 6,
+                                        repeat: Infinity,
+                                        ease: "linear",
+                                    }}
+                                />
+                            </svg>
+
+                            {/* Orbiting Satellite Bead */}
+                            {!prefersReducedMotion && (
+                                <div className="pointer-events-none absolute inset-0">
+                                    <motion.div
+                                        animate={{
+                                            rotate: 360,
+                                        }}
                                         transition={{
                                             duration: 6,
                                             repeat: Infinity,
                                             ease: "linear",
                                         }}
-                                    />
-                                </svg>
-
-                                {/* Orbiting Satellite Bead travelling around the perimeter */}
-                                {!prefersReducedMotion && (
-                                    <div className="pointer-events-none absolute inset-0">
-                                        <motion.div
-                                            animate={{
-                                                rotate: 360,
-                                            }}
-                                            transition={{
-                                                duration: 6,
-                                                repeat: Infinity,
-                                                ease: "linear",
-                                            }}
-                                            className="absolute -inset-x-8 -inset-y-4 sm:-inset-x-12 sm:-inset-y-5"
-                                        >
-                                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                                                <span className="h-2 w-2 rounded-full bg-[#f4f0e8] shadow-[0_0_12px_rgba(244,240,232,0.9)]" />
-                                                <span className="absolute h-4 w-4 rounded-full bg-[#f4f0e8]/30 blur-[2px]" />
-                                            </div>
-                                        </motion.div>
-                                    </div>
-                                )}
-                            </motion.div>
+                                        className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2"
+                                    >
+                                        <div className="absolute left-1/2 top-[calc(50%-62px)] flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+                                            <span className="h-2 w-2 rounded-full bg-[#f4f0e8] shadow-[0_0_12px_rgba(244,240,232,0.9)]" />
+                                            <span className="absolute h-4 w-4 rounded-full bg-[#f4f0e8]/30 blur-[2px]" />
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            )}
                         </motion.div>
                     </h2>
                 </div>
@@ -337,8 +322,7 @@ export default function Services() {
                 {/* Industries ("Who we build for") — Enlarged & 3D Interactive */}
                 <div
                     ref={whoWeBuildForRef}
-                    className="mt-24 border-t border-[#f4f0e8]/10 pt-12 md:mt-36 md:pt-16"
-                >
+                    className="mt-12 border-t border-[#f4f0e8]/10 pt-10 md:mt-16 md:pt-12"                >
                     <div className="reveal-heading-intro mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                         <div>
                             <div className="mb-3 flex items-center gap-2.5">

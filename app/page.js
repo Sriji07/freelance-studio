@@ -1,14 +1,14 @@
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Services from "@/components/Services";
-import Work from "@/components/Work";
-import Contact from "@/components/Contacts";
+import Navbar from "@/components/pages/Navbar";
+import Hero from "@/components/pages/Hero";
+import Services from "@/components/pages/Services";
+import Work from "@/components/pages/Work";
+import Contact from "@/components/pages/Contacts";
 import DotMatrixSection from "@/components/DotMatrixSection";
 import FullscreenVerticalBlinds from "@/components/FullscreenVerticalBlinds";
 import StickyStackedWorkToContact from "@/components/StickyStackedWorkToContact";
 import FullscreenContactToPhilosophyTransition from "@/components/FullscreenContactToPhilosophyTransition";
 import CornerCurtainTransition from "@/components/CornerCurtainTransition";
-import Footer from "@/components/Footer";
+import Footer from "@/components/pages/Footer";
 
 export default function Home() {
   return (
