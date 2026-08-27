@@ -35,8 +35,9 @@ export default function Home() {
         />
       </main>
 
-      <Footer />
-    </>
+      <div className="relative z-[100]">
+        <Footer />
+      </div>    </>
   );
 }
 
