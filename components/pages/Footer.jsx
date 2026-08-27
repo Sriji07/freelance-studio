@@ -11,11 +11,12 @@ const footerLinks = [
 
 export default function Footer() {
     return (
-        <footer className="bg-[#111111] px-5 pb-6 pt-16 text-[#f4f0e8] md:px-10 md:pt-20">
+        <footer className="bg-transparent px-5 pb-6 pt-10 text-[#f4f0e8] md:px-10 md:pt-12">
+
             <div className="mx-auto max-w-7xl">
 
-                {/* Main footer */}
-                <div className="flex flex-col gap-12 md:flex-row md:items-end md:justify-between">
+                {/* Main Footer */}
+                <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
 
                     {/* Brand */}
                     <div>
@@ -23,74 +24,84 @@ export default function Footer() {
                             href="#"
                             onClick={(e) => {
                                 e.preventDefault();
-                                window.dispatchEvent(new CustomEvent("trigger-velvet-top"));
+
+                                window.dispatchEvent(
+                                    new CustomEvent("trigger-velvet-top")
+                                );
                             }}
                             whileHover={{ x: 4 }}
-                            className="inline-block text-3xl font-bold tracking-[-0.06em] md:text-4xl cursor-pointer"
+                            className="inline-block cursor-pointer"
                         >
-                            DIVE<span className="text-[#f4f0e8]/30">.</span>
+                            <img
+                                src="/images/logo.png"
+                                alt="DIVE"
+                                draggable="false"
+                                className="h-auto w-24 md:w-32"
+                            />
                         </motion.a>
 
-                        <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#f4f0e8]/40">
+                        <p className="mt-2 max-w-xs text-xs leading-relaxed text-[#f4f0e8]/65">
                             Delve into design. Experience the immersive.
                         </p>
                     </div>
 
-                    {/* Navigation */}
-                    <div>
-                        <p className="mb-5 text-[10px] uppercase tracking-[0.2em] text-[#f4f0e8]/30">
-                            Explore
-                        </p>
 
-                        <nav className="flex flex-wrap gap-x-6 gap-y-3 md:gap-x-8">
-                            {footerLinks.map((link) => (
-                                <a
-                                    key={link.name}
-                                    href={link.href}
-                                    data-transition="corner-curtain"
-                                    onClick={(e) => {
-                                        if (typeof window !== "undefined" && window.triggerCornerTransition) {
-                                            e.preventDefault();
-                                            window.triggerCornerTransition(link.href, link.name);
-                                        }
-                                    }}
-                                    className="group relative text-sm text-[#f4f0e8]/70 transition-colors duration-300 hover:text-[#f4f0e8] cursor-pointer"
-                                >
-                                    {link.name}
+                    {/* Navigation — hidden on mobile */}
+                    <nav className="hidden flex-wrap gap-x-6 gap-y-3 md:flex md:gap-x-8">
+                        {footerLinks.map((link) => (
+                            <a
+                                key={link.name}
+                                href={link.href}
+                                data-transition="corner-curtain"
+                                onClick={(e) => {
+                                    if (
+                                        typeof window !== "undefined" &&
+                                        window.triggerCornerTransition
+                                    ) {
+                                        e.preventDefault();
 
-                                    <span className="absolute -bottom-1 left-0 h-px w-0 bg-[#f4f0e8] transition-all duration-300 group-hover:w-full" />
-                                </a>
-                            ))}
-                        </nav>
+                                        window.triggerCornerTransition(
+                                            link.href,
+                                            link.name
+                                        );
+                                    }
+                                }}
+                                className="group relative cursor-pointer text-xs text-[#f4f0e8]/75 transition-colors duration-300 hover:text-[#f4f0e8]"
+                            >
+                                {link.name}
+
+                                <span className="absolute -bottom-1 left-0 h-px w-0 bg-[#f4f0e8] transition-all duration-300 group-hover:w-full" />
+                            </a>
+                        ))}
+                    </nav>
+
+
+                    {/* Social — hidden on mobile */}
+                    <div className="hidden gap-5 md:flex">
+                        <a
+                            href="#"
+                            className="text-xs text-[#f4f0e8]/75 transition-colors duration-300 hover:text-[#f4f0e8]"
+                        >
+                            Instagram ↗
+                        </a>
+
+                        <a
+                            href="#"
+                            className="text-xs text-[#f4f0e8]/75 transition-colors duration-300 hover:text-[#f4f0e8]"
+                        >
+                            WhatsApp ↗
+                        </a>
                     </div>
 
-                    {/* Social */}
-                    <div>
-                        <p className="mb-5 text-[10px] uppercase tracking-[0.2em] text-[#f4f0e8]/30">
-                            Connect
-                        </p>
-
-                        <div className="flex gap-5">
-                            <a
-                                href="#"
-                                className="text-sm text-[#f4f0e8]/70 transition-colors hover:text-[#f4f0e8]"
-                            >
-                                Instagram ↗
-                            </a>
-
-                            <a
-                                href="#"
-                                className="text-sm text-[#f4f0e8]/70 transition-colors hover:text-[#f4f0e8]"
-                            >
-                                WhatsApp ↗
-                            </a>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Bottom line */}
-                <div className="mt-16 flex flex-col gap-3 border-t border-[#f4f0e8]/10 pt-5 text-[9px] uppercase tracking-[0.18em] text-[#f4f0e8]/25 sm:flex-row sm:items-center sm:justify-between">
-                    <span>© 2026 Dive. All rights reserved.</span>
+
+                {/* Bottom Bar */}
+                <div className="mt-8 flex flex-col gap-3 border-t border-[#f4f0e8]/15 pt-4 text-[8px] uppercase tracking-[0.18em] text-[#f4f0e8]/50 sm:flex-row sm:items-center sm:justify-between">
+
+                    <span>
+                        © 2026 DIVE. All rights reserved.
+                    </span>
 
                     <button
                         onClick={() =>
@@ -99,7 +110,7 @@ export default function Footer() {
                                 behavior: "smooth",
                             })
                         }
-                        className="group flex items-center gap-2 text-left transition-colors hover:text-[#f4f0e8]/60"
+                        className="group flex items-center gap-2 text-left text-[#f4f0e8]/50 transition-colors hover:text-[#f4f0e8]"
                     >
                         Back to top
 
@@ -107,7 +118,9 @@ export default function Footer() {
                             ↑
                         </span>
                     </button>
+
                 </div>
+
             </div>
         </footer>
     );
