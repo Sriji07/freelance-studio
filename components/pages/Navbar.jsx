@@ -97,7 +97,7 @@ export default function Navbar() {
                         className="relative z-50 flex items-center gap-1.5 cursor-pointer p-0"
                     >
                         <img
-                            src="/images/logo.png"
+                            src="/images/logo1.png"
                             alt="DIVE logo"
                             className="h-15 w-25 object-contain sm:h-12 sm:w-24 md:h-16 md:w-32"
                         />

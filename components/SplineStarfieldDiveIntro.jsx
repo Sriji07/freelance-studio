@@ -344,14 +344,28 @@ export default function SplineStarfieldDiveIntro({ children }) {
             ref={textOverlayRef}
             className="relative z-20 flex flex-col items-center justify-center text-center opacity-0 will-change-transform pointer-events-none"
           >
-            <h1 className="text-7xl sm:text-9xl md:text-[10rem] lg:text-[12rem] font-black tracking-[-0.07em] leading-none drop-shadow-[0_0_50px_rgba(250,247,240,0.35)]">
-              <span className="bg-gradient-to-b from-[#ffffff] via-[#faf7f0] to-[#e8e2d5] bg-clip-text text-transparent">
-                DIVE
-              </span>
-              <span className="inline-block text-[#f4f0e8]/50 ml-1">.</span>
-            </h1>
+            <div className="flex items-center justify-center">
+              <img
+                src="/images/logo.png"
+                alt="DIVE"
+                draggable="false"
+                className="
+                h-auto
+                w-[65vw]
+                max-w-[700px]
+                object-contain
+                sm:w-[60vw]
+                md:w-[55vw]
+                lg:w-[50vw]
+            "
+              />
 
-            <p className="mt-3 text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.32em] text-[#faf7f0]/70 text-center font-mono">
+              <span className="ml-1 text-5xl font-black text-[#f4f0e8]/50 sm:text-7xl md:text-8xl lg:text-9xl">
+                .
+              </span>
+            </div>
+
+            <p className="mt-4 text-center font-mono text-[9px] font-semibold uppercase tracking-[0.28em] text-[#faf7f0]/70 sm:text-[10px] md:text-xs lg:text-sm">
               Delve into design. Experience the immersive
             </p>
           </div>
