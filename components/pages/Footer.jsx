@@ -100,7 +100,7 @@ export default function Footer() {
                 <div className="mt-8 flex flex-col gap-3 border-t border-[#f4f0e8]/15 pt-4 text-[8px] uppercase tracking-[0.18em] text-[#f4f0e8]/50 sm:flex-row sm:items-center sm:justify-between">
 
                     <span>
-                        © 2026 DIVE. All rights reserved.
+                        © 2026 DIVE DESIGN. All rights reserved. Srijita Mallick. Shubhradip Saha.
                     </span>
 
                     <button
