@@ -270,34 +270,49 @@ export default function Work() {
             <div className="work-content-inner relative z-10 mx-auto max-w-7xl will-change-transform">
                 {/* Header with Masked Split-Word Rise */}
                 <div>
-                    <div className="mb-5 flex items-center gap-3">
+                    <div className="mb-4 flex items-center gap-3">
                         <span className="h-2 w-2 rounded-full bg-[#111111]" />
+
                         <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-black/40 sm:text-xs">
-                            02 — Selected Work
-                        </span>
+                            Our Designs                        </span>
                     </div>
 
-                    <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+                    <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                         <h2
                             ref={titleHeadingRef}
-                            className="max-w-4xl text-5xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-6xl md:text-8xl lg:text-[7rem]"
+                            className="max-w-4xl text-4xl font-bold leading-[0.9] tracking-[-0.06em] sm:text-5xl md:text-7xl lg:text-[6rem]"
                         >
                             <span className="inline-block overflow-hidden pb-1">
-                                <span className="route-city-word inline-block will-change-transform">Work</span>
+                                <span className="route-city-word inline-block will-change-transform">
+                                    Work
+                                </span>
                             </span>{" "}
+
                             <span className="inline-block overflow-hidden pb-1">
-                                <span className="route-city-word inline-block will-change-transform">made</span>
+                                <span className="route-city-word inline-block will-change-transform">
+                                    made
+                                </span>
                             </span>
+
                             <br />
+
                             <span className="text-black/30">
                                 <span className="inline-block overflow-hidden pb-1">
-                                    <span className="route-city-word inline-block will-change-transform">for</span>
+                                    <span className="route-city-word inline-block will-change-transform">
+                                        for
+                                    </span>
                                 </span>{" "}
+
                                 <span className="inline-block overflow-hidden pb-1">
-                                    <span className="route-city-word inline-block will-change-transform">real</span>
+                                    <span className="route-city-word inline-block will-change-transform">
+                                        real
+                                    </span>
                                 </span>{" "}
+
                                 <span className="inline-block overflow-hidden pb-1">
-                                    <span className="route-city-word inline-block will-change-transform">businesses.</span>
+                                    <span className="route-city-word inline-block will-change-transform">
+                                        businesses.
+                                    </span>
                                 </span>
                             </span>
                         </h2>
